@@ -1,33 +1,19 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: 'Giriş'
+description: 'Payven API dokümantasyonuna hoş geldiniz.'
 ---
 
 <Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
+  Bu API dokümantasyonu, Payven ödeme sisteminin entegrasyonu için gerekli tüm uç noktaları ve veri modellerini içerir.
 </Note>
 
-## Welcome
+## Hoş Geldiniz
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+Payven API, RESTful mimarisi üzerine kurulmuştur ve JSON formatında veri alışverişi yapar. Tüm istekler standart HTTP metodlarını (GET, POST, PUT, DELETE vb.) kullanır.
 
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+## Kimlik Doğrulama
 
-## Authentication
-
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+API'ye erişim için Bearer Token tabanlı kimlik doğrulama kullanılır. Token almak için `/api/auth/login` uç noktasını kullanabilirsiniz.
 
 ```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
-```
+"Authorization": "Bearer <token>"
