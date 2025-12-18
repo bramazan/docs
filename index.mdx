@@ -1,50 +1,151 @@
 ---
-title: Payven'e Hoş Geldiniz
-description: 'Ödeme sistemleri entegrasyonu ve yönetimi için kapsamlı dokümantasyon.'
+title: Welcome to Ödeal Payment Infrastructure
+description: Modern payment processing API for the Payment Facilitator (PF) model
 ---
 
-<img
-  className="block dark:hidden"
-  src="/images/hero-light.svg"
-  alt="Hero Light"
-/>
-<img
-  className="hidden dark:block"
-  src="/images/hero-dark.svg"
-  alt="Hero Dark"
-/>
+# Ödeal Payment Infrastructure API
 
-## Giriş
+Welcome to the Ödeal Payment Infrastructure documentation. Our platform provides a comprehensive payment processing solution designed for the Payment Facilitator model, enabling seamless payment acceptance for merchants and marketplaces.
 
-Payven, işletmelerin ödeme alma süreçlerini kolaylaştıran, güvenli ve modern bir Sanal POS çözümüdür. Craftgate benzeri esnek yapısı sayesinde farklı banka ve ödeme sağlayıcıları ile tek bir entegrasyon üzerinden çalışmanıza olanak tanır. Bu dokümantasyon, API kullanımı, entegrasyon adımları ve sistem mimarisi hakkında detaylı bilgiler içerir.
-
-## Başlarken
-
-Hızlıca entegrasyona başlamak için aşağıdaki adımları takip edebilirsiniz.
+## Key Features
 
 <CardGroup cols={2}>
   <Card
-    title="Hızlı Başlangıç"
-    icon="pen-to-square"
-    href="/quickstart"
+    title="Card Payments"
+    icon="credit-card"
+    href="/guides/payment-flows"
   >
-    Entegrasyon adımlarını ve temel konfigürasyonları öğrenin.
+    Accept payments with and without 3D Secure authentication
   </Card>
   <Card
-    title="API Referansı"
-    icon="image"
-    href="/api-reference/introduction"
+    title="Multi-Currency"
+    icon="globe"
+    href="/guides/multi-currency"
   >
-    Tüm API uç noktalarını ve kullanım detaylarını inceleyin.
+    Support for TRY, USD, EUR with Dynamic Currency Conversion (DCC)
+  </Card>
+  <Card
+    title="Marketplace"
+    icon="store"
+    href="/guides/marketplace-setup"
+  >
+    Sub-merchant onboarding and automated split payments
+  </Card>
+  <Card
+    title="Payment Links"
+    icon="link"
+    href="/guides/payment-links"
+  >
+    Generate secure, shareable payment links
   </Card>
 </CardGroup>
 
-## Özellikler
+## Getting Started
 
-Payven'in sunduğu temel özellikler:
+<Steps>
+  <Step title="Get API Credentials">
+    Contact our support team to receive your API credentials (API Key and Merchant ID)
+  </Step>
+  <Step title="Review Authentication">
+    Learn how to authenticate your API requests using API keys
+  </Step>
+  <Step title="Make Your First Payment">
+    Follow our quickstart guide to process your first payment
+  </Step>
+  <Step title="Explore Features">
+    Dive into advanced features like 3DS, multi-currency, and marketplace capabilities
+  </Step>
+</Steps>
 
-- **Tek Entegrasyon:** Tüm banka ve ödeme kuruluşlarına tek bir API üzerinden erişim.
-- **Akıllı Yönlendirme:** İşlemleri en uygun komisyon oranına veya başarı oranına sahip bankaya yönlendirme.
-- **Kart Saklama:** Güvenli kart saklama altyapısı ile tekrarlayan ödemeleri kolayca yönetme.
-- **Pazaryeri Çözümü:** Alt üye işyerleri için ödeme dağıtımı ve hakediş yönetimi.
-- **Gelişmiş Raporlama:** Detaylı işlem raporları ve mutabakat araçları.
+## Quick Links
+
+<CardGroup cols={3}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Get up and running in minutes
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/payments">
+    Explore all API endpoints
+  </Card>
+  <Card title="Postman Collection" icon="diagram-project" href="/development#postman-collection">
+    Import our Postman collection
+  </Card>
+</CardGroup>
+
+## Platform Capabilities
+
+### Payment Processing
+- **Non-3D & 3D Secure**: Full support for secure card payments
+- **Pre-Authorization**: Hold funds before capture
+- **Installments**: Flexible installment options
+- **Refunds & Voids**: Complete transaction lifecycle management
+
+### Multi-Currency & Localization
+- **Currency Support**: TRY, USD, EUR
+- **Dynamic Currency Conversion (DCC)**: Let cardholders pay in their card currency
+- **Exchange Rate Management**: Real-time forex rates
+
+### Marketplace Features
+- **Recursive Sub-merchants**: Unlimited hierarchy depth
+- **Split Payments**: Automated fund distribution
+- **Commission Management**: Flexible fee structures
+- **Individual Settlements**: Per-merchant payouts
+
+### Security & Compliance
+- **PCI DSS Level 1**: Fully compliant infrastructure
+- **GDPR & KVKK**: Data privacy compliance
+- **Encryption**: At rest and in transit
+- **Audit Logs**: Complete activity tracking
+
+### Developer Experience
+- **RESTful API**: Clean, intuitive endpoints
+- **Webhooks**: Real-time event notifications
+- **SDKs**: Coming soon (JavaScript, PHP, Python, C#)
+- **Comprehensive Documentation**: What you're reading now!
+
+## Architecture
+
+Our platform is built on modern microservices architecture:
+
+- **API Gateway**: Rate limiting, authentication, routing
+- **Payment Engine**: Core payment processing
+- **Bank Connectors**: 7 Tier-1 Turkish banks integrated
+- **Smart Routing**: Intelligent connector selection
+- **Ledger Integration**: Formance-based accounting
+- **Webhook System**: Svix-powered notifications
+
+## Support
+
+<CardGroup cols={2}>
+  <Card
+    title="Technical Documentation"
+    icon="book"
+    href="/essentials/authentication"
+  >
+    Detailed guides and API references
+  </Card>
+  <Card
+    title="Contact Support"
+    icon="envelope"
+  >
+    Email: support@odeal.com
+  </Card>
+</CardGroup>
+
+## What's Next?
+
+<CardGroup cols={2}>
+  <Card
+    title="Process Your First Payment"
+    icon="play"
+    href="/quickstart"
+  >
+    Follow our step-by-step quickstart guide
+  </Card>
+  <Card
+    title="Explore API Endpoints"
+    icon="code-branch"
+    href="/api-reference/payments"
+  >
+    Browse the complete API reference
+  </Card>
+</CardGroup>

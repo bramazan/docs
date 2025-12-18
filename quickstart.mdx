@@ -1,80 +1,339 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart Guide
+description: Get started with Ödeal Payment Infrastructure in minutes
 ---
 
-## Get started in three steps
+# Quickstart Guide
 
-Get your documentation site running locally and make your first customization.
+This guide will help you make your first payment using Ödeal Payment Infrastructure.
 
-### Step 1: Set up your local environment
+## Prerequisites
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+Before you begin, ensure you have:
+- API credentials (API key and merchant ID)
+- Development environment set up
+- Basic understanding of REST APIs
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+Don't have API credentials? Contact our support team at support@odeal.com
 </Note>
+
+## Step 1: Set Up Your Environment
+
+Store your API credentials securely:
+
+<CodeGroup>
+```bash Environment Variables
+export ODEAL_API_KEY="test_sk_xxxxxxxxxxxxxxxx"
+export ODEAL_MERCHANT_ID="merchant_123456"
+export ODEAL_API_URL="https://api.odeal.com/v1"
+```
+
+```javascript Node.js
+// config.js
+module.exports = {
+  apiKey: process.env.ODEAL_API_KEY,
+  merchantId: process.env.ODEAL_MERCHANT_ID,
+  apiUrl: 'https://api.odeal.com/v1'
+};
+```
+
+```python Python
+# config.py
+import os
+
+API_KEY = os.getenv('ODEAL_API_KEY')
+MERCHANT_ID = os.getenv('ODEAL_MERCHANT_ID')
+API_URL = 'https://api.odeal.com/v1'
+```
+
+```csharp C#
+// AppSettings.cs
+public class AppSettings
+{
+    public string ApiKey { get; set; }
+    public string MerchantId { get; set; }
+    public string ApiUrl { get; set; } = "https://api.odeal.com/v1";
+}
+```
+</CodeGroup>
+
+## Step 2: Import Postman Collection
+
+Download and import our Postman collection for quick testing:
+
+1. Download: [Postman Collection](/docs/api/postman_collection.json)
+2. Import into Postman
+3. Set environment variables
+4. Start testing!
+
+## Step 3: Create Your First Payment
+
+Let's create a simple non-3D payment:
+
+<CodeGroup>
+```bash cURL
+curl -X POST https://api.odeal.com/v1/payments \
+  -H "X-API-Key: test_sk_xxxxxxxxxxxxxxxx" \
+  -H "X-Idempotency-Key: $(uuidgen)" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "merchantId": "merchant_123456",
+    "amount": {
+      "amount": 100.00,
+      "currency": "TRY"
+    },
+    "cardDetails": {
+      "cardNumber": "5555444433332222",
+      "cardHolderName": "JOHN DOE",
+      "expiryMonth": "12",
+      "expiryYear": "2025",
+      "cvv": "123"
+    },
+    "operationType": "SALE",
+    "installments": 1,
+    "threeDSecure": false,
+    "description": "Test payment"
+  }'
+```
+
+```javascript Node.js
+const axios = require('axios');
+const { v4: uuidv4 } = require('uuid');
+const config = require('./config');
+
+async function createPayment() {
+  try {
+    const response = await axios.post(`${config.apiUrl}/payments`, {
+      merchantId: config.merchantId,
+      amount: {
+        amount: 100.00,
+        currency: 'TRY'
+      },
+      cardDetails: {
+        cardNumber: '5555444433332222',
+        cardHolderName: 'JOHN DOE',
+        expiryMonth: '12',
+        expiryYear: '2025',
+        cvv: '123'
+      },
+      operationType: 'SALE',
+      installments: 1,
+      threeDSecure: false,
+      description: 'Test payment'
+    }, {
+      headers: {
+        'X-API-Key': config.apiKey,
+        'X-Idempotency-Key': uuidv4(),
+        'Content-Type': 'application/json'
+      }
+    });
+
+    console.log('Payment successful:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Payment failed:', error.response?.data || error.message);
+    throw error;
+  }
+}
+
+createPayment();
+```
+
+```python Python
+import requests
+import uuid
+from config import API_KEY, MERCHANT_ID, API_URL
+
+def create_payment():
+    url = f"{API_URL}/payments"
+    headers = {
+        'X-API-Key': API_KEY,
+        'X-Idempotency-Key': str(uuid.uuid4()),
+        'Content-Type': 'application/json'
+    }
+    
+    payload = {
+        'merchantId': MERCHANT_ID,
+        'amount': {
+            'amount': 100.00,
+            'currency': 'TRY'
+        },
+        'cardDetails': {
+            'cardNumber': '5555444433332222',
+            'cardHolderName': 'JOHN DOE',
+            'expiryMonth': '12',
+            'expiryYear': '2025',
+            'cvv': '123'
+        },
+        'operationType': 'SALE',
+        'installments': 1,
+        'threeDSecure': False,
+        'description': 'Test payment'
+    }
+    
+    response = requests.post(url, json=payload, headers=headers)
+    response.raise_for_status()
+    
+    print('Payment successful:', response.json())
+    return response.json()
+
+if __name__ == '__main__':
+    create_payment()
+```
+
+```csharp C#
+using System;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+
+public class PaymentService
+{
+    private readonly HttpClient _httpClient;
+    private readonly AppSettings _settings;
+
+    public PaymentService(AppSettings settings)
+    {
+        _settings = settings;
+        _httpClient = new HttpClient
+        {
+            BaseAddress = new Uri(_settings.ApiUrl)
+        };
+        _httpClient.DefaultRequestHeaders.Add("X-API-Key", _settings.ApiKey);
+    }
+
+    public async Task<PaymentResponse> CreatePayment()
+    {
+        var request = new PaymentRequest
+        {
+            MerchantId = _settings.MerchantId,
+            Amount = new Amount { Amount = 100.00m, Currency = "TRY" },
+            CardDetails = new CardDetails
+            {
+                CardNumber = "5555444433332222",
+                CardHolderName = "JOHN DOE",
+                ExpiryMonth = "12",
+                ExpiryYear = "2025",
+                Cvv = "123"
+            },
+            OperationType = "SALE",
+            Installments = 1,
+            ThreeDSecure = false,
+            Description = "Test payment"
+        };
+
+        var content = new StringContent(
+            JsonSerializer.Serialize(request),
+            Encoding.UTF8,
+            "application/json"
+        );
+
+        var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/payments");
+        httpRequest.Headers.Add("X-Idempotency-Key", Guid.NewGuid().ToString());
+        httpRequest.Content = content;
+
+        var response = await _httpClient.SendAsync(httpRequest);
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<PaymentResponse>(result);
+    }
+}
+```
+</CodeGroup>
+
+## Step 4: Handle the Response
+
+A successful payment returns:
+
+```json
+{
+  "transactionId": "550e8400-e29b-41d4-a716-446655440000",
+  "status": "Completed",
+  "amount": {
+    "amount": 100.00,
+    "currency": "TRY"
+  },
+  "cardDetails": {
+    "maskedCardNumber": "555544******2222",
+    "cardBrand": "Mastercard"
+  },
+  "createdAt": "2025-01-15T10:30:00Z",
+  "authCode": "123456",
+  "rrn": "000123456789"
+}
+```
+
+## Step 5: Set Up Webhooks (Recommended)
+
+Configure webhooks to receive real-time payment notifications:
+
+1. Create a webhook endpoint in your application
+2. Register it with Ödeal (contact support)
+3. Handle webhook events
+
+```javascript Example Webhook Handler
+app.post('/webhooks/payment', (req, res) => {
+  const event = req.body;
+  
+  // Verify webhook signature (implement this!)
+  if (!verifySignature(req)) {
+    return res.status(401).send('Invalid signature');
+  }
+  
+  switch (event.type) {
+    case 'payment.succeeded':
+      handlePaymentSuccess(event.data);
+      break;
+    case 'payment.failed':
+      handlePaymentFailure(event.data);
+      break;
+    case 'payment.refunded':
+      handlePaymentRefund(event.data);
+      break;
+  }
+  
+  res.status(200).send('OK');
+});
+```
+
+## Test Card Numbers
+
+Use these cards for testing:
+
+| Card Number | Brand | Scenario |
+|-------------|-------|----------|
+| `5555444433332222` | Mastercard | ✅ Success |
+| `4111111111111111` | Visa | ✅ Success |
+| `5555444433331111` | Mastercard | ❌ Insufficient funds |
+| `4111111111112222` | Visa | 🔐 Requires 3DS |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Implement 3D Secure" href="/guides/3ds-integration">
+    Add secure authentication for reduced fraud
+  </Card>
+  <Card title="Explore Payment Flows" href="/guides/payment-flows">
+    Learn about refunds, voids, and pre-auth
+  </Card>
+  <Card title="Multi-Currency" href="/guides/multi-currency">
+    Accept payments in USD and EUR
+  </Card>
+  <Card title="API Reference" href="/api-reference/payments">
+    Explore all available endpoints
+  </Card>
+</CardGroup>
+
+## Need Help?
+
+<CardGroup cols={2}>
+  <Card title="Documentation" href="/essentials/authentication">
+    Browse our comprehensive guides
+  </Card>
+  <Card title="Support" icon="envelope">
+    Email: support@odeal.com
+  </Card>
+</CardGroup>
