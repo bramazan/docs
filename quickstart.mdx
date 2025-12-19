@@ -1,32 +1,32 @@
 ---
-title: Quickstart Guide
-description: Get started with Ödeal Payment Infrastructure in minutes
+title: Hızlı Başlangıç Rehberi
+description: Ödeal Payment Infrastructure ile dakikalar içinde başlayın
 ---
 
-# Quickstart Guide
+# Hızlı Başlangıç Rehberi
 
-This guide will help you make your first payment using Ödeal Payment Infrastructure.
+Bu rehber, Ödeal Payment Infrastructure kullanarak ilk ödemenizi yapmanıza yardımcı olacak.
 
-## Prerequisites
+## Ön Gereksinimler
 
-Before you begin, ensure you have:
-- API credentials (API key and merchant ID)
-- Development environment set up
-- Basic understanding of REST APIs
+Başlamadan önce şunlara sahip olduğunuzdan emin olun:
+- API kimlik bilgileri (API anahtarı ve merchant ID)
+- Kurulmuş geliştirme ortamı
+- Temel REST API bilgisi
 
 <Note>
-Don't have API credentials? Contact our support team at support@odeal.com
+API kimlik bilgileriniz yok mu? Destek ekibimizle support@odeal.com adresinden iletişime geçin
 </Note>
 
-## Step 1: Set Up Your Environment
+## Adım 1: Ortamınızı Kurun
 
-Store your API credentials securely:
+API kimlik bilgilerinizi güvenli bir şekilde saklayın:
 
 <CodeGroup>
 ```bash Environment Variables
 export ODEAL_API_KEY="test_sk_xxxxxxxxxxxxxxxx"
 export ODEAL_MERCHANT_ID="merchant_123456"
-export ODEAL_API_URL="https://api.odeal.com/v1"
+export ODEAL_API_URL="https://api.odeal.com.tr/v1"
 ```
 
 ```javascript Node.js
@@ -34,7 +34,7 @@ export ODEAL_API_URL="https://api.odeal.com/v1"
 module.exports = {
   apiKey: process.env.ODEAL_API_KEY,
   merchantId: process.env.ODEAL_MERCHANT_ID,
-  apiUrl: 'https://api.odeal.com/v1'
+  apiUrl: 'https://api.odeal.com.tr/v1'
 };
 ```
 
@@ -44,37 +44,18 @@ import os
 
 API_KEY = os.getenv('ODEAL_API_KEY')
 MERCHANT_ID = os.getenv('ODEAL_MERCHANT_ID')
-API_URL = 'https://api.odeal.com/v1'
-```
-
-```csharp C#
-// AppSettings.cs
-public class AppSettings
-{
-    public string ApiKey { get; set; }
-    public string MerchantId { get; set; }
-    public string ApiUrl { get; set; } = "https://api.odeal.com/v1";
-}
+API_URL = 'https://api.odeal.com.tr/v1'
 ```
 </CodeGroup>
 
-## Step 2: Import Postman Collection
+## Adım 2: İlk Ödemenizi Oluşturun
 
-Download and import our Postman collection for quick testing:
-
-1. Download: [Postman Collection](/docs/api/postman_collection.json)
-2. Import into Postman
-3. Set environment variables
-4. Start testing!
-
-## Step 3: Create Your First Payment
-
-Let's create a simple non-3D payment:
+Basit bir non-3D ödeme oluşturalım:
 
 <CodeGroup>
 ```bash cURL
-curl -X POST https://api.odeal.com/v1/payments \
-  -H "X-API-Key: test_sk_xxxxxxxxxxxxxxxx" \
+curl -X POST https://api.odeal.com.tr/v1/payments \
+  -H "Authorization: Bearer $ODEAL_API_KEY" \
   -H "X-Idempotency-Key: $(uuidgen)" \
   -H "Content-Type: application/json" \
   -d '{
@@ -84,8 +65,8 @@ curl -X POST https://api.odeal.com/v1/payments \
       "currency": "TRY"
     },
     "cardDetails": {
-      "cardNumber": "5555444433332222",
-      "cardHolderName": "JOHN DOE",
+      "cardNumber": "5400619360964581",
+      "cardHolderName": "MEHMET YILMAZ",
       "expiryMonth": "12",
       "expiryYear": "2025",
       "cvv": "123"
@@ -93,26 +74,23 @@ curl -X POST https://api.odeal.com/v1/payments \
     "operationType": "SALE",
     "installments": 1,
     "threeDSecure": false,
-    "description": "Test payment"
+    "description": "Test ödeme"
   }'
 ```
 
 ```javascript Node.js
 const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
-const config = require('./config');
 
 async function createPayment() {
-  try {
-    const response = await axios.post(`${config.apiUrl}/payments`, {
-      merchantId: config.merchantId,
-      amount: {
-        amount: 100.00,
-        currency: 'TRY'
-      },
+  const response = await axios.post(
+    'https://api.odeal.com.tr/v1/payments',
+    {
+      merchantId: process.env.ODEAL_MERCHANT_ID,
+      amount: { amount: 100.00, currency: 'TRY' },
       cardDetails: {
-        cardNumber: '5555444433332222',
-        cardHolderName: 'JOHN DOE',
+        cardNumber: '5400619360964581',
+        cardHolderName: 'MEHMET YILMAZ',
         expiryMonth: '12',
         expiryYear: '2025',
         cvv: '123'
@@ -120,133 +98,60 @@ async function createPayment() {
       operationType: 'SALE',
       installments: 1,
       threeDSecure: false,
-      description: 'Test payment'
-    }, {
+      description: 'Test ödeme'
+    },
+    {
       headers: {
-        'X-API-Key': config.apiKey,
+        'Authorization': `Bearer ${process.env.ODEAL_API_KEY}`,
         'X-Idempotency-Key': uuidv4(),
         'Content-Type': 'application/json'
       }
-    });
-
-    console.log('Payment successful:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('Payment failed:', error.response?.data || error.message);
-    throw error;
-  }
+    }
+  );
+  
+  console.log('Ödeme başarılı:', response.data);
+  return response.data;
 }
-
-createPayment();
 ```
 
 ```python Python
 import requests
 import uuid
-from config import API_KEY, MERCHANT_ID, API_URL
+import os
 
 def create_payment():
-    url = f"{API_URL}/payments"
-    headers = {
-        'X-API-Key': API_KEY,
-        'X-Idempotency-Key': str(uuid.uuid4()),
-        'Content-Type': 'application/json'
-    }
-    
-    payload = {
-        'merchantId': MERCHANT_ID,
-        'amount': {
-            'amount': 100.00,
-            'currency': 'TRY'
-        },
-        'cardDetails': {
-            'cardNumber': '5555444433332222',
-            'cardHolderName': 'JOHN DOE',
-            'expiryMonth': '12',
-            'expiryYear': '2025',
-            'cvv': '123'
-        },
-        'operationType': 'SALE',
-        'installments': 1,
-        'threeDSecure': False,
-        'description': 'Test payment'
-    }
-    
-    response = requests.post(url, json=payload, headers=headers)
-    response.raise_for_status()
-    
-    print('Payment successful:', response.json())
-    return response.json()
-
-if __name__ == '__main__':
-    create_payment()
-```
-
-```csharp C#
-using System;
-using System.Net.Http;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-
-public class PaymentService
-{
-    private readonly HttpClient _httpClient;
-    private readonly AppSettings _settings;
-
-    public PaymentService(AppSettings settings)
-    {
-        _settings = settings;
-        _httpClient = new HttpClient
-        {
-            BaseAddress = new Uri(_settings.ApiUrl)
-        };
-        _httpClient.DefaultRequestHeaders.Add("X-API-Key", _settings.ApiKey);
-    }
-
-    public async Task<PaymentResponse> CreatePayment()
-    {
-        var request = new PaymentRequest
-        {
-            MerchantId = _settings.MerchantId,
-            Amount = new Amount { Amount = 100.00m, Currency = "TRY" },
-            CardDetails = new CardDetails
-            {
-                CardNumber = "5555444433332222",
-                CardHolderName = "JOHN DOE",
-                ExpiryMonth = "12",
-                ExpiryYear = "2025",
-                Cvv = "123"
+    response = requests.post(
+        'https://api.odeal.com.tr/v1/payments',
+        json={
+            'merchantId': os.getenv('ODEAL_MERCHANT_ID'),
+            'amount': {'amount': 100.00, 'currency': 'TRY'},
+            'cardDetails': {
+                'cardNumber': '5400619360964581',
+                'cardHolderName': 'MEHMET YILMAZ',
+                'expiryMonth': '12',
+                'expiryYear': '2025',
+                'cvv': '123'
             },
-            OperationType = "SALE",
-            Installments = 1,
-            ThreeDSecure = false,
-            Description = "Test payment"
-        };
-
-        var content = new StringContent(
-            JsonSerializer.Serialize(request),
-            Encoding.UTF8,
-            "application/json"
-        );
-
-        var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/payments");
-        httpRequest.Headers.Add("X-Idempotency-Key", Guid.NewGuid().ToString());
-        httpRequest.Content = content;
-
-        var response = await _httpClient.SendAsync(httpRequest);
-        response.EnsureSuccessStatusCode();
-
-        var result = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<PaymentResponse>(result);
-    }
-}
+            'operationType': 'SALE',
+            'installments': 1,
+            'threeDSecure': False,
+            'description': 'Test ödeme'
+        },
+        headers={
+            'Authorization': f'Bearer {os.getenv("ODEAL_API_KEY")}',
+            'X-Idempotency-Key': str(uuid.uuid4()),
+            'Content-Type': 'application/json'
+        }
+    )
+    
+    print('Ödeme başarılı:', response.json())
+    return response.json()
 ```
 </CodeGroup>
 
-## Step 4: Handle the Response
+## Adım 3: Yanıtı İşleyin
 
-A successful payment returns:
+Başarılı bir ödeme şu yanıtı döndürür:
 
 ```json
 {
@@ -257,30 +162,30 @@ A successful payment returns:
     "currency": "TRY"
   },
   "cardDetails": {
-    "maskedCardNumber": "555544******2222",
+    "maskedCardNumber": "540061******4581",
     "cardBrand": "Mastercard"
   },
-  "createdAt": "2025-01-15T10:30:00Z",
   "authCode": "123456",
-  "rrn": "000123456789"
+  "rrn": "000123456789",
+  "createdAt": "2025-12-19T18:30:00Z"
 }
 ```
 
-## Step 5: Set Up Webhooks (Recommended)
+## Adım 4: Webhook'ları Kurun (Önerilen)
 
-Configure webhooks to receive real-time payment notifications:
+Gerçek zamanlı ödeme bildirimleri almak için webhook'ları yapılandırın:
 
-1. Create a webhook endpoint in your application
-2. Register it with Ödeal (contact support)
-3. Handle webhook events
+1. Uygulamanızda bir webhook endpoint'i oluşturun
+2. Ödeal ile kaydedin (destek ile iletişime geçin)
+3. Webhook event'lerini işleyin
 
-```javascript Example Webhook Handler
+```javascript Webhook Handler Örneği
 app.post('/webhooks/payment', (req, res) => {
   const event = req.body;
   
-  // Verify webhook signature (implement this!)
+  // Webhook imzasını doğrulayın
   if (!verifySignature(req)) {
-    return res.status(401).send('Invalid signature');
+    return res.status(401).send('Geçersiz imza');
   }
   
   switch (event.type) {
@@ -299,41 +204,45 @@ app.post('/webhooks/payment', (req, res) => {
 });
 ```
 
-## Test Card Numbers
+## Test Kartları
 
-Use these cards for testing:
+Test için bu kartları kullanın:
 
-| Card Number | Brand | Scenario |
-|-------------|-------|----------|
-| `5555444433332222` | Mastercard | ✅ Success |
-| `4111111111111111` | Visa | ✅ Success |
-| `5555444433331111` | Mastercard | ❌ Insufficient funds |
-| `4111111111112222` | Visa | 🔐 Requires 3DS |
+| Kart Numarası | Marka | Senaryo |
+|---------------|-------|---------|
+| `5400619360964581` | Mastercard | ✅ Başarılı |
+| `5400619563874511` | Mastercard | 🔐 3DS gerekli |
+| `4355084355084358` | Visa | ❌ Başarısız |
+| `4111111111111111` | Visa | ✅ Başarılı |
 
-## Next Steps
+<Tip>
+Test ortamında tüm kartlar için CVV: `123`, Son kullanma: `12/2025` kullanabilirsiniz.
+</Tip>
+
+## Sıradaki Adımlar
 
 <CardGroup cols={2}>
-  <Card title="Implement 3D Secure" href="/guides/3ds-integration">
-    Add secure authentication for reduced fraud
+  <Card title="3D Secure Ekleyin" href="/features/3ds-integration">
+    Daha güvenli ödeme için 3DS ekleyin
   </Card>
-  <Card title="Explore Payment Flows" href="/guides/payment-flows">
-    Learn about refunds, voids, and pre-auth
+  <Card title="Ödeme Akışlarını Keşfedin" href="/features/payment-flows">
+    İade, iptal ve ön provizyon hakkında bilgi edinin
   </Card>
-  <Card title="Multi-Currency" href="/guides/multi-currency">
-    Accept payments in USD and EUR
+  <Card title="Çoklu Para Birimi" href="/features/multi-currency">
+    USD ve EUR ile ödeme kabul edin
   </Card>
-  <Card title="API Reference" href="/api-reference/payments">
-    Explore all available endpoints
+  <Card title="API Referansı" href="/api-reference/payments">
+    Tüm endpoint'leri keşfedin
   </Card>
 </CardGroup>
 
-## Need Help?
+## Yardıma mı İhtiyacınız Var?
 
 <CardGroup cols={2}>
-  <Card title="Documentation" href="/essentials/authentication">
-    Browse our comprehensive guides
+  <Card title="Dokümantasyon" href="/api-reference/overview">
+    Kapsamlı rehberlerimize göz atın
   </Card>
-  <Card title="Support" icon="envelope">
-    Email: support@odeal.com
+  <Card title="Destek" icon="envelope">
+    E-posta: support@odeal.com
   </Card>
 </CardGroup>

@@ -1,0 +1,315 @@
+---
+title: Changelog
+description: Track all updates, new features, and improvements to the Ödeal Payment Infrastructure
+icon: 'clock-rotate-left'
+---
+
+# Changelog
+
+Stay up to date with the latest features, improvements, and bug fixes to the Ödeal Payment Infrastructure.
+
+## December 2025
+
+### [v2.1.0] - 2025-12-19
+
+<Check>Multi-Currency & DCC Support</Check>
+
+**New Features**
+- 🌍 **Multi-Currency Support**: Accept payments in TRY, USD, and EUR
+- 💱 **Dynamic Currency Conversion (DCC)**: Let customers pay in their card's currency
+- 📊 **Exchange Rate Service**: Real-time forex rates from TCMB
+- 🔄 **Automatic Currency Routing**: Smart routing based on currency and bank support
+
+**Improvements**
+- Enhanced error messages with `CURRENCY_NOT_SUPPORTED` error code
+- Added currency validation across all payment endpoints
+- Improved transaction reporting with multi-currency support
+
+**API Changes**
+```diff
+POST /v1/payments
+{
+  "merchantId": "merchant-123",
+  "amount": 100.00,
++ "currency": "USD",
++ "dccEnabled": true
+}
+```
+
+---
+
+### [v2.0.5] - 2025-12-18
+
+<Check>API Rate Limiting</Check>
+
+**New Features**
+- 🛡️ **Rate Limiting**: Token bucket algorithm with Redis backend
+- 📈 **Rate Limit Headers**: Clear rate limit status in responses
+- ⚙️ **Configurable Limits**: Per-merchant rate limit configuration
+
+**Response Headers**
+```
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 847
+X-RateLimit-Reset: 1703001600
+```
+
+---
+
+### [v2.0.4] - 2025-12-18
+
+<Check>Pay by Link</Check>
+
+**New Features**
+- 🔗 **Payment Links**: Generate secure, shareable payment URLs
+- ⏰ **Configurable Expiry**: Set custom expiration dates
+- 📱 **Mobile Optimized**: Responsive hosted payment pages
+- 🔔 **Link Events**: Webhook notifications for link interactions
+
+---
+
+## November 2025
+
+### [v2.0.3] - 2025-11-25
+
+<Check>Marketplace Enhancements</Check>
+
+**New Features**
+- 🏪 **Recursive Sub-Merchants**: Unlimited hierarchy depth for complex marketplace structures
+- 💰 **Split Payments**: Automatic commission distribution
+- 📊 **Merchant Dashboard**: Transaction visibility for sub-merchants
+- 🔐 **Enhanced KYC**: Improved merchant verification flow
+
+---
+
+### [v2.0.2] - 2025-11-15
+
+<Check>3D Secure 2.0</Check>
+
+**New Features**
+- 🔒 **3DS 2.0 Support**: Enhanced authentication with frictionless flow
+- 📱 **Mobile SDK Support**: Native 3DS challenge handling
+- 🎯 **Smart 3DS Routing**: Risk-based authentication triggering
+
+**Bug Fixes**
+- Fixed 3DS redirect URL encoding issue
+- Improved 3DS timeout handling
+- Enhanced error messages for 3DS failures
+
+---
+
+### [v2.0.1] - 2025-11-05
+
+<Check>Infrastructure Improvements</Check>
+
+**Improvements**
+- ⚡ 40% faster payment processing times
+- 📈 Auto-scaling for high-traffic periods
+- 🔄 Improved webhook delivery reliability
+- 🛡️ Enhanced DDoS protection
+
+---
+
+## October 2025
+
+### [v2.0.0] - 2025-10-20
+
+<Warning>Breaking Changes</Warning>
+
+**Major Release**
+- 🚀 **API v2 Launch**: New RESTful API design
+- 🏗️ **Clean Architecture**: Domain-driven design implementation
+- 📦 **Modular Structure**: Better separation of concerns
+- 🧪 **Comprehensive Tests**: 90%+ code coverage
+
+**Breaking Changes**
+```diff
+- POST /api/payment/create
++ POST /v1/payments
+
+- Response: { success: true, data: {...} }
++ Response: { id: "...", status: "...", data: {...} }
+```
+
+**Migration Guide**: See [Migration Guide](/resources/migration-guides) for detailed upgrade instructions.
+
+---
+
+### [v1.9.5] - 2025-10-10
+
+<Check>Webhook Improvements</Check>
+
+**New Features**
+- 🎯 **Event Filtering**: Subscribe to specific event types
+- 🔁 **Automatic Retries**: Exponential backoff for failed deliveries
+- 🔐 **Signature Verification**: HMAC-SHA256 webhook signatures
+- 📊 **Webhook Dashboard**: Monitor delivery status
+
+---
+
+## September 2025
+
+### [v1.9.4] - 2025-09-28
+
+<Check>Performance & Security</Check>
+
+**Improvements**
+- 🔐 Added PCI DSS Level 1 certification
+- 🚀 Reduced API latency by 30%
+- 📊 Enhanced monitoring and alerting
+- 🛡️ Improved fraud detection algorithms
+
+**Bug Fixes**
+- Fixed timezone handling in transaction timestamps
+- Corrected refund amount calculation for partial refunds
+- Improved error handling for network timeouts
+
+---
+
+### [v1.9.3] - 2025-09-15
+
+<Check>Installment Support</Check>
+
+**New Features**
+- 💳 **Flexible Installments**: Support for 2-12 month installments
+- 🏦 **Bank-Specific Rules**: Respect bank installment limits
+- 📊 **Installment Breakdown**: Clear cost breakdown in responses
+
+---
+
+### [v1.9.2] - 2025-09-05
+
+<Check>API Documentation</Check>
+
+**Improvements**
+- 📚 **New Documentation Platform**: Migrated to Mintlify
+- 🎨 **Interactive Examples**: Live code samples
+- 🔍 **Enhanced Search**: Faster, more accurate search
+- 🌍 **Multi-Language**: Turkish and English support
+
+---
+
+## August 2025
+
+### [v1.9.1] - 2025-08-22
+
+<Check>Refund & Void Enhancements</Check>
+
+**New Features**
+- ✅ **Partial Refunds**: Refund any amount up to original transaction
+- ⚡ **Instant Voids**: Same-day void support
+- 🔔 **Refund Webhooks**: Real-time refund notifications
+
+---
+
+### [v1.9.0] - 2025-08-10
+
+<Check>Authorization & Capture</Check>
+
+**New Features**
+- 💰 **Pre-Authorization**: Hold funds without capturing
+- ⏰ **Delayed Capture**: Capture within 7 days
+- 📊 **Auth Reporting**: Track authorized vs captured amounts
+
+---
+
+## Older Versions
+
+<Accordion title="July 2025 - View Older Releases">
+
+### [v1.8.5] - 2025-07-25
+- Added BIN lookup service
+- Improved card validation
+- Enhanced error codes
+
+### [v1.8.4] - 2025-07-15
+- Database performance optimizations
+- Added request logging
+- Bug fixes
+
+### [v1.8.3] - 2025-07-05
+- Added settlement reporting
+- Improved reconciliation tools
+- Minor bug fixes
+
+</Accordion>
+
+<Accordion title="June 2025 - View Older Releases">
+
+### [v1.8.2] - 2025-06-28
+- Webhook retry improvements
+- Added health check endpoints
+- Security enhancements
+
+### [v1.8.1] - 2025-06-15
+- Added idempotency support
+- Improved API versioning
+- Documentation updates
+
+### [v1.8.0] - 2025-06-01
+- Initial public API launch
+- Basic payment processing
+- 3D Secure support
+
+</Accordion>
+
+## Upcoming Features
+
+<Info>
+The following features are planned for future releases. Timelines are approximate and subject to change.
+</Info>
+
+### Q1 2026
+
+- 🔄 **Subscription Management**: Native recurring billing support
+- 📱 **Mobile SDKs**: iOS and Android native SDKs
+- 🌐 **Additional Currencies**: GBP, JPY support
+- 🤖 **AI Fraud Detection**: Machine learning-based fraud prevention
+
+### Q2 2026
+
+- 💳 **Virtual Cards**: Issue virtual cards for payouts
+- 🔗 **Open Banking**: PSD2 compliant account-to-account payments
+- 📊 **Advanced Analytics**: Custom dashboards and reporting
+- 🛒 **Shopping Cart Integration**: Pre-built e-commerce plugins
+
+### Q3 2026
+
+- 🌍 **Global Expansion**: Support for additional countries
+- 💱 **Crypto Payments**: Bitcoin and Ethereum acceptance
+- 🎯 **Smart Routing 2.0**: ML-based routing optimization
+- 📞 **Voice Payments**: IVR payment integration
+
+## Stay Updated
+
+<CardGroup cols={2}>
+  <Card title="API Status" icon="signal" href="/resources/status">
+    Check real-time system status
+  </Card>
+  <Card title="Migration Guides" icon="arrow-right-arrow-left" href="/resources/migration-guides">
+    Upgrade to latest version
+  </Card>
+  <Card title="Support" icon="headset" href="/resources/support">
+    Get help from our team
+  </Card>
+  <Card title="GitHub" icon="github" href="https://github.com/odeal">
+    View source code
+  </Card>
+</CardGroup>
+
+## Subscribe to Updates
+
+Get notified about new releases and important changes:
+
+```bash
+# Subscribe via webhook
+curl -X POST https://api.odeal.com/v1/webhooks \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://your-app.com/webhooks/odeal",
+    "events": ["release.published", "api.deprecated"]
+  }'
+```
+
+Or join our mailing list: [subscribe@odeal.com](mailto:subscribe@odeal.com)

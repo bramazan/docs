@@ -1,151 +1,151 @@
 ---
-title: Welcome to Ödeal Payment Infrastructure
-description: Modern payment processing API for the Payment Facilitator (PF) model
+title: Ödeal Payment Infrastructure'a Hoş Geldiniz
+description: Payment Facilitator (PF) modeli için modern ödeme işleme API'si
 ---
 
 # Ödeal Payment Infrastructure API
 
-Welcome to the Ödeal Payment Infrastructure documentation. Our platform provides a comprehensive payment processing solution designed for the Payment Facilitator model, enabling seamless payment acceptance for merchants and marketplaces.
+Ödeal Payment Infrastructure dokümantasyonuna hoş geldiniz. Platformumuz, Payment Facilitator modeli için tasarlanmış kapsamlı bir ödeme işleme çözümü sunarak, üye işyerleri ve marketplace'ler için kesintisiz ödeme kabulü sağlar.
 
-## Key Features
+## Temel Özellikler
 
 <CardGroup cols={2}>
   <Card
-    title="Card Payments"
+    title="Kart Ödemeleri"
     icon="credit-card"
-    href="/guides/payment-flows"
+    href="/features/payment-flows"
   >
-    Accept payments with and without 3D Secure authentication
+    3D Secure ile veya 3D Secure olmadan ödeme kabul edin
   </Card>
   <Card
-    title="Multi-Currency"
+    title="Çoklu Para Birimi"
     icon="globe"
-    href="/guides/multi-currency"
+    href="/features/multi-currency"
   >
-    Support for TRY, USD, EUR with Dynamic Currency Conversion (DCC)
+    Dinamik Para Birimi Dönüşümü (DCC) ile TRY, USD, EUR desteği
   </Card>
   <Card
     title="Marketplace"
     icon="store"
-    href="/guides/marketplace-setup"
+    href="/features/marketplace"
   >
-    Sub-merchant onboarding and automated split payments
+    Alt üye işyeri onboarding ve otomatik split payment
   </Card>
   <Card
-    title="Payment Links"
+    title="Ödeme Linkleri"
     icon="link"
-    href="/guides/payment-links"
+    href="/features/pay-by-link"
   >
-    Generate secure, shareable payment links
+    Güvenli, paylaşılabilir ödeme linkleri oluşturun
   </Card>
 </CardGroup>
 
-## Getting Started
+## Başlarken
 
 <Steps>
-  <Step title="Get API Credentials">
-    Contact our support team to receive your API credentials (API Key and Merchant ID)
+  <Step title="API Kimlik Bilgilerini Alın">
+    API kimlik bilgilerinizi (API Anahtarı ve Merchant ID) almak için destek ekibimizle iletişime geçin
   </Step>
-  <Step title="Review Authentication">
-    Learn how to authenticate your API requests using API keys
+  <Step title="Kimlik Doğrulamayı İnceleyin">
+    API isteklerinizi API anahtarları kullanarak nasıl doğrulayacağınızı öğrenin
   </Step>
-  <Step title="Make Your First Payment">
-    Follow our quickstart guide to process your first payment
+  <Step title="İlk Ödemenizi Yapın">
+    İlk ödemenizi işlemek için hızlı başlangıç rehberimizi takip edin
   </Step>
-  <Step title="Explore Features">
-    Dive into advanced features like 3DS, multi-currency, and marketplace capabilities
+  <Step title="Özellikleri Keşfedin">
+    3DS, çoklu para birimi ve marketplace yetenekleri gibi gelişmiş özellikleri keşfedin
   </Step>
 </Steps>
 
-## Quick Links
+## Hızlı Bağlantılar
 
 <CardGroup cols={3}>
-  <Card title="Quick Start" icon="rocket" href="/quickstart">
-    Get up and running in minutes
+  <Card title="Hızlı Başlangıç" icon="rocket" href="/quickstart">
+    Dakikalar içinde başlayın
   </Card>
-  <Card title="API Reference" icon="code" href="/api-reference/payments">
-    Explore all API endpoints
+  <Card title="API Referansı" icon="code" href="/api-reference/payments">
+    Tüm API endpoint'lerini keşfedin
   </Card>
-  <Card title="Postman Collection" icon="diagram-project" href="/development#postman-collection">
-    Import our Postman collection
+  <Card title="Postman Koleksiyonu" icon="diagram-project" href="/development#postman-collection">
+    Postman koleksiyonumuzu içe aktarın
   </Card>
 </CardGroup>
 
-## Platform Capabilities
+## Platform Yetenekleri
 
-### Payment Processing
-- **Non-3D & 3D Secure**: Full support for secure card payments
-- **Pre-Authorization**: Hold funds before capture
-- **Installments**: Flexible installment options
-- **Refunds & Voids**: Complete transaction lifecycle management
+### Ödeme İşleme
+- **Non-3D & 3D Secure**: Güvenli kart ödemeleri için tam destek
+- **Ön Provizyon**: Capture öncesi fon tutma
+- **Taksit**: Esnek taksit seçenekleri
+- **İade & İptal**: Tam işlem yaşam döngüsü yönetimi
 
-### Multi-Currency & Localization
-- **Currency Support**: TRY, USD, EUR
-- **Dynamic Currency Conversion (DCC)**: Let cardholders pay in their card currency
-- **Exchange Rate Management**: Real-time forex rates
+### Çoklu Para Birimi & Yerelleştirme
+- **Para Birimi Desteği**: TRY, USD, EUR
+- **Dinamik Para Birimi Dönüşümü (DCC)**: Kart sahiplerinin kendi para birimlerinde ödeme yapmasını sağlayın
+- **Döviz Kuru Yönetimi**: Gerçek zamanlı forex kurları
 
-### Marketplace Features
-- **Recursive Sub-merchants**: Unlimited hierarchy depth
-- **Split Payments**: Automated fund distribution
-- **Commission Management**: Flexible fee structures
-- **Individual Settlements**: Per-merchant payouts
+### Marketplace Özellikleri
+- **Recursive Alt Üye İşyerleri**: Sınırsız hiyerarşi derinliği
+- **Split Payment**: Otomatik fon dağıtımı
+- **Komisyon Yönetimi**: Esnek ücret yapıları
+- **Bireysel Ödeme**: Üye işyeri bazında ödemeler
 
-### Security & Compliance
-- **PCI DSS Level 1**: Fully compliant infrastructure
-- **GDPR & KVKK**: Data privacy compliance
-- **Encryption**: At rest and in transit
-- **Audit Logs**: Complete activity tracking
+### Güvenlik & Uyumluluk
+- **PCI DSS Level 1**: Tam uyumlu altyapı
+- **GDPR & KVKK**: Veri gizliliği uyumluluğu
+- **Şifreleme**: Beklemede ve iletimde
+- **Audit Log'ları**: Tam aktivite takibi
 
-### Developer Experience
-- **RESTful API**: Clean, intuitive endpoints
-- **Webhooks**: Real-time event notifications
-- **SDKs**: Coming soon (JavaScript, PHP, Python, C#)
-- **Comprehensive Documentation**: What you're reading now!
+### Geliştirici Deneyimi
+- **RESTful API**: Temiz, sezgisel endpoint'ler
+- **Webhook'lar**: Gerçek zamanlı event bildirimleri
+- **SDK'lar**: Yakında (JavaScript, PHP, Python, C#)
+- **Kapsamlı Dokümantasyon**: Şu anda okuduğunuz!
 
-## Architecture
+## Mimari
 
-Our platform is built on modern microservices architecture:
+Platformumuz modern microservices mimarisinde inşa edilmiştir:
 
-- **API Gateway**: Rate limiting, authentication, routing
-- **Payment Engine**: Core payment processing
-- **Bank Connectors**: 7 Tier-1 Turkish banks integrated
-- **Smart Routing**: Intelligent connector selection
-- **Ledger Integration**: Formance-based accounting
-- **Webhook System**: Svix-powered notifications
+- **API Gateway**: Rate limiting, kimlik doğrulama, yönlendirme
+- **Payment Engine**: Temel ödeme işleme
+- **Bank Connectors**: 7 Tier-1 Türk bankası entegre
+- **Smart Routing**: Akıllı connector seçimi
+- **Ledger Entegrasyonu**: Formance tabanlı muhasebe
+- **Webhook Sistemi**: Svix destekli bildirimler
 
-## Support
+## Destek
 
 <CardGroup cols={2}>
   <Card
-    title="Technical Documentation"
+    title="Teknik Dokümantasyon"
     icon="book"
-    href="/essentials/authentication"
+    href="/api-reference/authentication"
   >
-    Detailed guides and API references
+    Detaylı rehberler ve API referansları
   </Card>
   <Card
-    title="Contact Support"
+    title="Destek İletişim"
     icon="envelope"
   >
-    Email: support@odeal.com
+    E-posta: support@odeal.com
   </Card>
 </CardGroup>
 
-## What's Next?
+## Sırada Ne Var?
 
 <CardGroup cols={2}>
   <Card
-    title="Process Your First Payment"
+    title="İlk Ödemenizi İşleyin"
     icon="play"
     href="/quickstart"
   >
-    Follow our step-by-step quickstart guide
+    Adım adım hızlı başlangıç rehberimizi takip edin
   </Card>
   <Card
-    title="Explore API Endpoints"
+    title="API Endpoint'lerini Keşfedin"
     icon="code-branch"
     href="/api-reference/payments"
   >
-    Browse the complete API reference
+    Tam API referansına göz atın
   </Card>
 </CardGroup>
