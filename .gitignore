@@ -1,0 +1,4 @@
+# mint export ciktisi — deploy sirasinda uretilir (deploy.bat mintlify), commit edilmez
+site/
+export.zip
+node_modules/
