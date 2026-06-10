@@ -39,7 +39,7 @@ Mevcut bir gateway entegrasyonunuz varsa Payven'e geçiş genelde **birkaç gün
 | `buyerIp` / `ipAddress` | `buyer.ip_address` | İç içe |
 | `conversationId` (iyzico) | `external_id` | Sizin sipariş ID'niz |
 | `basketId` | `basket_id` | Aynı |
-| `callbackUrl` (3DS) | `callback_url` (`/payments/3d/init` body'sinde) | Aynı |
+| `callbackUrl` (3DS) | `success_url` + `fail_url` (`/payments/3d/init` body'sinde) | Payven banka callback'ini kendisi karşılar; siz yalnızca sonuç yönlendirme URL'lerini verirsiniz |
 | `merchantId` | `X-Merchant-Id` header *veya* `X-External-Merchant-Id` header | Body'de değil header'da |
 
 ## Yanıt eşleştirmesi

@@ -9,10 +9,10 @@ description: "Tamamlanmış transferin banka makbuz PDF'ini indirin veya Base64 
 
 ```http
 GET /api/v1/transfers/{id}/receipt/download   # PDF dosyası (binary)
-GET /api/v1/transfers/{id}/receipt/base-64    # Base64-encoded string
+GET /api/v1/transfers/{id}/receipt/base64     # Base64-encoded string
 ```
 
-**Yetki:** `transfer-viewer` veya üzeri.
+**Yetki:** transfer görüntüleme yetkisi (`CanViewTransfers`).
 
 ## PDF dosyası olarak indirme
 
@@ -28,7 +28,7 @@ Yanıt:
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/pdf
-Content-Disposition: attachment; filename="TRF-20260503-0001.pdf"
+Content-Disposition: attachment; filename="PAYVEN_8e3f5c12-9a7b-4c8d-bc4e-2c963f66afa6.pdf"
 Content-Length: 47823
 ```
 
@@ -39,36 +39,29 @@ PDF binary içeriği döner. Tarayıcıda doğrudan görüntülemek için `Conte
 E-posta eki, mobil uygulama görüntüleme veya başka bir sistemden yükleme yaparken doğrudan Base64 string almak daha pratiktir:
 
 ```bash
-curl https://transfer.payven.com.tr/api/v1/transfers/8e3f5c12-9a7b-4c8d-bc4e-2c963f66afa6/receipt/base-64 \
-  -H "Authorization: Bearer $PAYVEN_TOKEN" \
-  -H "X-Tenant-Id: $TENANT_ID"
+curl https://transfer.payven.com.tr/api/v1/transfers/8e3f5c12-9a7b-4c8d-bc4e-2c963f66afa6/receipt/base64 \
+  -H "Authorization: Bearer $PAYVEN_TOKEN"
 ```
 
-Yanıt:
+Yanıt **ham Base64 string**'dir (JSON nesnesi değil):
 
 ```json
-{
-  "transfer_id":  "8e3f5c12-9a7b-4c8d-bc4e-2c963f66afa6",
-  "receipt_no":   "TRF-20260503-0001",
-  "filename":     "TRF-20260503-0001.pdf",
-  "content_type": "application/pdf",
-  "content":      "JVBERi0xLjQKJYCBgoMKMSAwIG9iago8PA..."
-}
+"JVBERi0xLjQKJYCBgoMKMSAwIG9iago8PA..."
 ```
 
 Tipik kullanım — Node.js ile e-posta eki:
 
 ```javascript
 const res = await fetch(
-  `https://transfer.payven.com.tr/api/v1/transfers/${transferId}/receipt/base-64`,
-  { headers: { Authorization: `Bearer ${token}`, "X-Tenant-Id": tenantId } }
+  `https://transfer.payven.com.tr/api/v1/transfers/${transferId}/receipt/base64`,
+  { headers: { Authorization: `Bearer ${token}` } }
 );
-const { content, filename } = await res.json();
+const content = await res.json(); // ham base64 string
 
 await mailer.send({
   to: customer.email,
   subject: "Transfer dekontunuz",
-  attachments: [{ filename, content, encoding: "base64" }],
+  attachments: [{ filename: `dekont-${transferId}.pdf`, content, encoding: "base64" }],
 });
 ```
 
@@ -100,9 +93,7 @@ Banka tarafından üretilen makbuz şu bilgileri taşır (banka şablonuna göre
 
 | HTTP | `code` | Anlam |
 |---|---|---|
-| `404` | `transfer_not_found` | Verilen `id` bulunamadı |
-| `409` | `receipt_not_available` | Transfer henüz `completed`/`delivered` değil |
-| `502` | `bank_receipt_error` | Banka tarafından dekont alınamadı (geçici) |
+| `404` | `resource_not_found` | Verilen `id` bulunamadı, transfer henüz dekont üretmemiş veya banka dekontu döndüremedi — `message` alanında detay bulunur |
 | `403` | `forbidden` | Yetki yok |
 
-`502 bank_receipt_error` durumunda işlem geçici sayılır — kısa süre sonra tekrar deneyin. Banka tarafı 24 saatte üretmediyse [destek talebi](/resources/support) açın; konsol üzerinden manuel temin edilebilir.
+Banka dekontu henüz üretmediyse kısa süre sonra tekrar deneyin. Banka tarafı 24 saatte üretmediyse [destek talebi](/resources/support) açın; konsol üzerinden manuel temin edilebilir.

@@ -34,25 +34,27 @@ stateDiagram-v2
 
 ## Konfigürasyon
 
-Circuit Breaker, konnektör HTTP istemcisi üzerinde **Polly** kütüphanesi ile uygulanmıştır (`Infrastructure/Http/PollyPolicies.cs`). Mevcut varsayılanlar:
+Circuit Breaker, konnektör HTTP istemcisi üzerinde **Polly** kütüphanesi ile uygulanmıştır (`Infrastructure/Http/PollyPolicies.cs`). Mevcut varsayılanlar (`AdvancedCircuitBreakerAsync`, sampling window tabanlı):
 
 | Parametre | Varsayılan | Açıklama |
 |---|---|---|
-| `exceptionsAllowedBeforeBreaking` | 3 | Bu sayıda ardışık geçici HTTP hatası → Open |
-| `durationOfBreakInSeconds` | 30 sn | Open kalma süresi (sonra HalfOpen'a geçer) |
+| `failureThreshold` | 0.5 | Sampling window içindeki hata oranı eşiği (%50) |
+| `minimumThroughput` | 10 | Bu sayıdan az çağrıda CB değerlendirme yapılmaz |
+| `samplingDuration` | 30 sn | Rolling pencere uzunluğu |
+| `durationOfBreak` | 15 sn | Open kalma süresi (sonra HalfOpen'a geçer) |
 | HalfOpen test trafiği | 1 istek | Tek başarılı istek → Closed; başarısız → Open |
-| Retry policy (ayrı) | 3 deneme | Exponential backoff (`2^attempt` saniye) |
+| Retry policy (ayrı, INNER) | 3 deneme | Exponential backoff (`2^attempt` saniye) |
 | Timeout | 30 sn | İstek başına |
 
 <Note>
-Implementasyon Polly'nin **basit `CircuitBreakerAsync`** policy'sidir — exception **count** tabanlı (oran tabanlı değil). "Rolling pencere içinde %50 hata" gibi gelişmiş ölçümler `AdvancedCircuitBreakerAsync`'a geçişle yol haritasında.
+Pipeline sırası **CB OUTER, Retry INNER**. Aksi sıralamada bir kullanıcı çağrısının 3 retry denemesi CB'ye 3 ayrı hata yazar ve birkaç geçici hatada CB açılır. Şu anki sırada **1 kullanıcı çağrısı = CB için 1 sample**.
 </Note>
 
 Konnektör başına özelleştirme için: **Konsol → Konnektörler → [Konfigürasyon]** ekranı veya `PUT /api/v1/connector-configurations/{id}` endpoint'i.
 
 ## Açılma kriteri
 
-Bir konnektör HTTP istemcisi **3 ardışık geçici hata** (5xx, timeout, network) verdiğinde Open'a geçer. 30 saniye boyunca o konnektöre çağrı yapılmaz; süre sonunda HalfOpen'a geçilir ve tek bir test isteği denenir.
+Bir konnektör HTTP istemcisi son **30 sn**'deki en az **10 çağrıdan** **%50'si** geçici hata (5xx, timeout, network) verdiğinde Open'a geçer. **15 saniye** boyunca o konnektöre çağrı yapılmaz; süre sonunda HalfOpen'a geçilir ve tek bir test isteği denenir.
 
 ## Yarı-açık hal (HalfOpen)
 

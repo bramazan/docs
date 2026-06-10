@@ -58,7 +58,7 @@ ENV_HOSTS = {
         "sanal-pos": "http://localhost:5001",
         "transfer":  "http://localhost:5000",
         "identity":  "http://localhost:5101",
-        "fraud":     "http://localhost:5102",
+        "fraud":     "http://localhost:5003",
     },
 }
 

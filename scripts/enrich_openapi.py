@@ -42,6 +42,9 @@ DROP_PATH_PATTERNS = [
     r"^/api/v1/validation/decrypt-card$",
     r"^/api/v1/payments/3d/callback$",
     r"^/api/v1/lookups/bank-bins/import$",
+    # Operasyonel cache debug endpoint'leri — public gelistirici dokumani disi.
+    r"^/api/v1/cache/",
+    r"^/api/v1/platform/cache/",
 ]
 DROP_TAGS = {
     "FraudCallback",
@@ -1378,9 +1381,9 @@ def main():
         if not path.exists():
             print(f"SKIP (missing): {path}")
             continue
-        spec = json.loads(path.read_text())
+        spec = json.loads(path.read_text(encoding="utf-8"))
         spec, stats = enrich_spec(spec)
-        path.write_text(json.dumps(spec, indent=2, ensure_ascii=False))
+        path.write_text(json.dumps(spec, indent=2, ensure_ascii=False), encoding="utf-8")
         rel = path.relative_to(ROOT)
         print(f"== {rel} ==")
         for k, v in stats.items():

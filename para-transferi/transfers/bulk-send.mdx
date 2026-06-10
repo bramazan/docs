@@ -50,13 +50,13 @@ Content-Type: application/json
     {
       "id":           "8e3f5c12-9a7b-4c8d-bc4e-2c963f66afa6",
       "status":       "processing",
-      "sent_date":    "2026-05-03T12:34:58.000+00:00"
+      "sent_date":    "2026-05-03T12:34:58.000+03:00"
     },
     {
       "id":           "9f3d2b8e-...",
       "status":       "completed",
-      "sent_date":    "2026-05-03T12:34:58.500+00:00",
-      "processed_date":"2026-05-03T12:34:59.234+00:00",
+      "sent_date":    "2026-05-03T12:34:58.500+03:00",
+      "processed_date":"2026-05-03T12:34:59.234+03:00",
       "receipt_no":   "TRF-20260503-0001"
     }
   ],
@@ -80,7 +80,8 @@ FAST ve EFT işlemleri çoğu zaman asenkron tamamlanır. `processing` veya `del
 
 | Webhook olayı | Tetikleyici |
 |---|---|
-| `transfer.succeeded` | Transfer başarıyla tamamlandı (`completed`) |
+| `transfer.completed` | Transfer başarıyla tamamlandı (`completed`) |
+| `transfer.delivered` | Banka asenkron kabul etti (FAST ara durumu) |
 | `transfer.failed` | Banka reddi veya teknik hata |
 
 Detay: [Webhook Olayları](/para-transferi/webhooks/events).

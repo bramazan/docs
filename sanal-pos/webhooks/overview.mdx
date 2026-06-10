@@ -45,24 +45,35 @@ X-Payven-Signature:    sha256=4f1d8c92ab7e3bcf9...
 X-Payven-Timestamp:    1714742400
 ```
 
+Gövde olayın kendisidir (**düz/flat** JSON — ayrıca bir `data` zarfı yoktur). Olay tipi ve
+teslimat metadata'sı HTTP header'larında taşınır:
+
 ```json
 {
-  "id":         "evt_8e3f5c129a7b4c8dbc4e",
-  "type":       "payment.completed",
-  "created_at": "2026-05-03T12:34:58.123+00:00",
-  "data": {
-    "transaction_id":          "8e3f5c12-9a7b-4c8d-bc4e-2c963f66afa6",
-    "status":                  "completed",
-    "amount":                  15000,
-    "currency":                "TRY",
-    "merchant_id":             "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    "provider_transaction_id": "9f3d2b8e-...",
-    "auth_code":               "123456",
-    "error_code":              null,
-    "error_message":           null,
-    "masked_card_number":      "454671******7894",
-    "card_brand":              "visa"
-  }
+  "event_type":              "payment.completed",
+  "webhook_event_id":        "9f1c8e76-2a3b-4f12-9c8d-12cb24a8a8a8",
+  "transaction_id":          "8e3f5c12-9a7b-4c8d-bc4e-2c963f66afa6",
+  "tenant_id":               "11111111-1111-1111-1111-111111111111",
+  "status":                  "completed",
+  "operation_type":          "sale",
+  "amount":                  15000,
+  "currency":                "TRY",
+  "merchant_id":             "MRCH-001",
+  "external_id":             "ORDER-1001",
+  "basket_id":               "BASKET-2026-001",
+  "provider_transaction_id": "9f3d2b8e-...",
+  "auth_code":               "123456",
+  "host_reference":          "PAYVEN-REF-789",
+  "error_code":              null,
+  "error_message":           null,
+  "masked_card_number":      "454671******7894",
+  "card_brand":              "visa",
+  "connector_config_id":     "5b2e7c10-...",
+  "bank_code":               "akbank",
+  "payment_method_category": "card",
+  "installment_count":       1,
+  "occurred_at":             "2026-05-03T15:34:58.123+03:00",
+  "metadata":                { "checkout_session_id": "..." }
 }
 ```
 
@@ -96,7 +107,7 @@ Yanıt:
   "secret":          "whsec_AbC123dEf456GhI789jKl012MnO345pQ",
   "max_retry_count": 5,
   "is_active":       true,
-  "created_at":      "2026-05-03T12:34:56.789+00:00"
+  "created_at":      "2026-05-03T12:34:56.789+03:00"
 }
 ```
 
@@ -166,7 +177,7 @@ Sandbox webhook'ları gerçek imzayla gelir — imza doğrulamayı sandbox'a da 
     HMAC-SHA256 verifikasyon kodu — 5 dilde örnek.
   </Card>
   <Card title="Olay Tipleri" icon="list" href="/sanal-pos/webhooks/events">
-    Tüm 8 olay tipi ve payload alanları.
+    Tüm 29 olay tipi ve payload alanları.
   </Card>
   <Card title="Retry Politikası" icon="arrows-rotate" href="/sanal-pos/webhooks/retry-policy">
     5 deneme, 1m → 24h backoff + ±20% jitter.

@@ -1,8 +1,8 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.1",
   "info": {
     "title": "Payven Fraud API",
-    "description": "Payven Fraud — gerçek zamanlı risk skorlama ve fraud kural motoru.",
+    "description": "Payven Fraud — gercek zamanli risk skorlama ve fraud kural motoru.",
     "termsOfService": "https://payven.com.tr/sozlesmeler",
     "contact": {
       "name": "Payven Developer Support",
@@ -17,12 +17,12 @@
   },
   "servers": [
     {
-      "url": "https://fraud-sandbox.payven.com.tr",
-      "description": "Sandbox"
-    },
-    {
       "url": "https://fraud.payven.com.tr",
       "description": "Production"
+    },
+    {
+      "url": "https://fraud-sandbox.payven.com.tr",
+      "description": "Sandbox"
     }
   ],
   "paths": {
@@ -36,14 +36,22 @@
             "name": "status",
             "in": "query",
             "schema": {
-              "$ref": "#/components/schemas/FraudAlertStatus"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FraudAlertStatus"
+                }
+              ]
             }
           },
           {
             "name": "process",
             "in": "query",
             "schema": {
-              "$ref": "#/components/schemas/FraudProcess"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FraudProcess"
+                }
+              ]
             }
           },
           {
@@ -86,6 +94,13 @@
             }
           },
           {
+            "name": "include_inactive",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "name": "search_term",
             "in": "query",
             "schema": {
@@ -99,7 +114,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FraudAlertDtoPaginatedList"
+                  "$ref": "#/components/schemas/PaginatedListOfFraudAlertDto"
                 }
               }
             }
@@ -151,7 +166,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ResolveBody"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FraudAlertResolveBody"
+                  }
+                ]
               }
             }
           }
@@ -172,7 +191,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                    }
+                  ]
                 }
               }
             }
@@ -233,7 +259,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ResolveBody"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FraudAlertResolveBody"
+                  }
+                ]
               }
             }
           }
@@ -254,7 +284,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                    }
+                  ]
                 }
               }
             }
@@ -288,512 +325,6 @@
         "summary": "Platform fraud uyarısını reddet"
       }
     },
-    "/api/v1/platform/fraud/blacklist": {
-      "get": {
-        "tags": [
-          "PlatformFraudBlacklist"
-        ],
-        "parameters": [
-          {
-            "name": "entry_type",
-            "in": "query",
-            "schema": {
-              "$ref": "#/components/schemas/BlacklistEntryType"
-            }
-          },
-          {
-            "name": "scope",
-            "in": "query",
-            "schema": {
-              "$ref": "#/components/schemas/FraudRuleScope"
-            }
-          },
-          {
-            "name": "include_global",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "page_size",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "search_term",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BlacklistEntryDtoPaginatedList"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          },
-          "503": {
-            "$ref": "#/components/responses/ServiceUnavailable"
-          }
-        },
-        "operationId": "listPlatformFraudBlacklist",
-        "summary": "Platform kara liste kayıtlarını listele"
-      },
-      "post": {
-        "tags": [
-          "PlatformFraudBlacklist"
-        ],
-        "parameters": [
-          {
-            "name": "Idempotency-Key",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AddBlacklistEntryRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BlacklistEntryDto"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          },
-          "503": {
-            "$ref": "#/components/responses/ServiceUnavailable"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "422": {
-            "$ref": "#/components/responses/UnprocessableEntity"
-          }
-        },
-        "operationId": "createPlatformFraudBlacklist",
-        "summary": "Platform kara liste kaydı oluştur"
-      }
-    },
-    "/api/v1/platform/fraud/blacklist/{id}": {
-      "delete": {
-        "tags": [
-          "PlatformFraudBlacklist"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          },
-          "503": {
-            "$ref": "#/components/responses/ServiceUnavailable"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/UnprocessableEntity"
-          }
-        },
-        "operationId": "deletePlatformFraudBlacklist",
-        "summary": "Platform kara liste kaydını sil"
-      }
-    },
-    "/api/v1/platform/fraud/rules": {
-      "get": {
-        "tags": [
-          "PlatformFraudRules"
-        ],
-        "parameters": [
-          {
-            "name": "scope",
-            "in": "query",
-            "schema": {
-              "$ref": "#/components/schemas/FraudRuleScope"
-            }
-          },
-          {
-            "name": "tenant_id",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "process",
-            "in": "query",
-            "schema": {
-              "$ref": "#/components/schemas/FraudProcess"
-            }
-          },
-          {
-            "name": "is_active",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "include_global",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "page_size",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "search_term",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FraudRuleDtoPaginatedList"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          },
-          "503": {
-            "$ref": "#/components/responses/ServiceUnavailable"
-          }
-        },
-        "operationId": "listPlatformFraudRules",
-        "summary": "Platform fraud kurallarını listele"
-      },
-      "post": {
-        "tags": [
-          "PlatformFraudRules"
-        ],
-        "parameters": [
-          {
-            "name": "Idempotency-Key",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateFraudRuleRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FraudRuleDto"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          },
-          "503": {
-            "$ref": "#/components/responses/ServiceUnavailable"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "422": {
-            "$ref": "#/components/responses/UnprocessableEntity"
-          }
-        },
-        "operationId": "createPlatformFraudRule",
-        "summary": "Platform fraud kuralı oluştur"
-      }
-    },
-    "/api/v1/platform/fraud/rules/{id}": {
-      "patch": {
-        "tags": [
-          "PlatformFraudRules"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateFraudRuleRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FraudRuleDto"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          },
-          "503": {
-            "$ref": "#/components/responses/ServiceUnavailable"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/UnprocessableEntity"
-          }
-        },
-        "operationId": "patchPlatformFraudRule",
-        "summary": "Platform fraud kuralını kısmi güncelle"
-      },
-      "delete": {
-        "tags": [
-          "PlatformFraudRules"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          },
-          "503": {
-            "$ref": "#/components/responses/ServiceUnavailable"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/UnprocessableEntity"
-          }
-        },
-        "operationId": "deletePlatformFraudRule",
-        "summary": "Platform fraud kuralını sil"
-      }
-    },
     "/api/v1/fraud/alerts": {
       "get": {
         "tags": [
@@ -804,14 +335,22 @@
             "name": "status",
             "in": "query",
             "schema": {
-              "$ref": "#/components/schemas/FraudAlertStatus"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FraudAlertStatus"
+                }
+              ]
             }
           },
           {
             "name": "process",
             "in": "query",
             "schema": {
-              "$ref": "#/components/schemas/FraudProcess"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FraudProcess"
+                }
+              ]
             }
           },
           {
@@ -854,6 +393,13 @@
             }
           },
           {
+            "name": "include_inactive",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "name": "search_term",
             "in": "query",
             "schema": {
@@ -867,7 +413,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FraudAlertDtoPaginatedList"
+                  "$ref": "#/components/schemas/PaginatedListOfFraudAlertDto"
                 }
               }
             }
@@ -919,7 +465,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ResolveBody"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FraudAlertResolveBody"
+                  }
+                ]
               }
             }
           }
@@ -940,7 +490,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                    }
+                  ]
                 }
               }
             }
@@ -1001,7 +558,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ResolveBody"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FraudAlertResolveBody"
+                  }
+                ]
               }
             }
           }
@@ -1022,7 +583,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                    }
+                  ]
                 }
               }
             }
@@ -1066,21 +634,11 @@
             "name": "entry_type",
             "in": "query",
             "schema": {
-              "$ref": "#/components/schemas/BlacklistEntryType"
-            }
-          },
-          {
-            "name": "scope",
-            "in": "query",
-            "schema": {
-              "$ref": "#/components/schemas/FraudRuleScope"
-            }
-          },
-          {
-            "name": "include_global",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/BlacklistEntryType"
+                }
+              ]
             }
           },
           {
@@ -1100,6 +658,13 @@
             }
           },
           {
+            "name": "include_inactive",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "name": "search_term",
             "in": "query",
             "schema": {
@@ -1113,7 +678,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BlacklistEntryDtoPaginatedList"
+                  "$ref": "#/components/schemas/PaginatedListOfBlacklistEntryDto"
                 }
               }
             }
@@ -1154,7 +719,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AddBlacklistEntryRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/AddBlacklistEntryRequest"
+                  }
+                ]
               }
             }
           }
@@ -1175,7 +744,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                    }
+                  ]
                 }
               }
             }
@@ -1231,7 +807,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                    }
+                  ]
                 }
               }
             }
@@ -1265,6 +848,72 @@
         "summary": "Kara liste kaydını sil"
       }
     },
+    "/api/v1/fraud/dashboard/stats": {
+      "get": {
+        "tags": [
+          "TenantFraudDashboard"
+        ],
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "process",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FraudDashboardStatsDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        },
+        "operationId": "getTenantFraudDashboardStats",
+        "summary": "Tenantfrauddashboard istatistiklerini getir"
+      }
+    },
     "/api/v1/fraud/logs": {
       "get": {
         "tags": [
@@ -1275,21 +924,22 @@
             "name": "process",
             "in": "query",
             "schema": {
-              "$ref": "#/components/schemas/FraudProcess"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FraudProcess"
+                }
+              ]
             }
           },
           {
             "name": "decision",
             "in": "query",
             "schema": {
-              "$ref": "#/components/schemas/FraudAction"
-            }
-          },
-          {
-            "name": "merchant_external_id",
-            "in": "query",
-            "schema": {
-              "type": "string"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FraudAction"
+                }
+              ]
             }
           },
           {
@@ -1341,6 +991,13 @@
             }
           },
           {
+            "name": "include_inactive",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "name": "search_term",
             "in": "query",
             "schema": {
@@ -1354,7 +1011,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FraudCheckLogDtoPaginatedList"
+                  "$ref": "#/components/schemas/PaginatedListOfFraudCheckLogDto"
                 }
               }
             }
@@ -1364,7 +1021,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                    }
+                  ]
                 }
               }
             }
@@ -1452,7 +1116,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpsertMerchantPolicyRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/UpsertMerchantPolicyRequest"
+                  }
+                ]
               }
             }
           }
@@ -1507,36 +1175,18 @@
         ],
         "parameters": [
           {
-            "name": "scope",
-            "in": "query",
-            "schema": {
-              "$ref": "#/components/schemas/FraudRuleScope"
-            }
-          },
-          {
-            "name": "tenant_id",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
             "name": "process",
             "in": "query",
             "schema": {
-              "$ref": "#/components/schemas/FraudProcess"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/FraudProcess"
+                }
+              ]
             }
           },
           {
             "name": "is_active",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "include_global",
             "in": "query",
             "schema": {
               "type": "boolean"
@@ -1559,6 +1209,13 @@
             }
           },
           {
+            "name": "include_inactive",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "name": "search_term",
             "in": "query",
             "schema": {
@@ -1572,7 +1229,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FraudRuleDtoPaginatedList"
+                  "$ref": "#/components/schemas/PaginatedListOfFraudRuleDto"
                 }
               }
             }
@@ -1613,7 +1270,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateFraudRuleRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateFraudRuleRequest"
+                  }
+                ]
               }
             }
           }
@@ -1634,7 +1295,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                    }
+                  ]
                 }
               }
             }
@@ -1685,7 +1353,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateFraudRuleRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/UpdateFraudRuleRequest"
+                  }
+                ]
               }
             }
           }
@@ -1706,7 +1378,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                    }
+                  ]
                 }
               }
             }
@@ -1763,7 +1442,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                    }
+                  ]
                 }
               }
             }
@@ -1800,32 +1486,379 @@
   },
   "components": {
     "schemas": {
-      "ProblemDetails": {
+      "AddBlacklistEntryRequest": {
         "type": "object",
         "properties": {
-          "type": {
-            "type": "string",
-            "nullable": true
+          "tenant_id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           },
-          "title": {
-            "type": "string",
-            "nullable": true
+          "merchant_id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           },
-          "status": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
+          "entry_type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BlacklistEntryType"
+              }
+            ]
           },
-          "detail": {
-            "type": "string",
-            "nullable": true
+          "value": {
+            "type": [
+              "null",
+              "string"
+            ]
           },
-          "instance": {
-            "type": "string",
-            "nullable": true
+          "display_value": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "expires_at": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
           }
         },
-        "additionalProperties": {}
+        "additionalProperties": false
+      },
+      "BlacklistEntryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenant_id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "merchant_id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "entry_type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BlacklistEntryType"
+              }
+            ]
+          },
+          "display_value": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "expires_at": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BlacklistEntryType": {
+        "enum": [
+          "Card",
+          "Email",
+          "Ip",
+          "Device",
+          "Iban",
+          "MerchantExternalId"
+        ],
+        "type": "string"
+      },
+      "CreateFraudRuleRequest": {
+        "type": "object",
+        "properties": {
+          "tenant_id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "merchant_id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "process": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudProcess"
+              }
+            ]
+          },
+          "code": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudRuleType"
+              }
+            ]
+          },
+          "expression_json": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "action": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudAction"
+              }
+            ]
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "is_active": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EvaluateFraudRequest": {
+        "required": [
+          "amount_minor",
+          "external_txn_id",
+          "merchant_external_id",
+          "process"
+        ],
+        "type": "object",
+        "properties": {
+          "process": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudProcess"
+              }
+            ]
+          },
+          "external_txn_id": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "merchant_external_id": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "amount_minor": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "currency": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "customer": {
+            "type": "null",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudCustomerSignals"
+              }
+            ]
+          },
+          "instrument": {
+            "type": "null",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudInstrumentSignals"
+              }
+            ]
+          },
+          "context": {
+            "type": "null",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudContextSignals"
+              }
+            ]
+          },
+          "extras": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "EvaluationResultDto": {
+        "type": "object",
+        "properties": {
+          "decision_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudAction"
+              }
+            ]
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason_codes": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "matched_rule_ids": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "challenge": {
+            "type": "null",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudChallenge"
+              }
+            ]
+          },
+          "review_ttl_seconds": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "latency_ms": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "provider_used": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "FinalizeDecisionRequest": {
+        "required": [
+          "decision_id",
+          "outcome"
+        ],
+        "type": "object",
+        "properties": {
+          "decision_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outcome": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TxnOutcome"
+              }
+            ]
+          },
+          "bank_response_code": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "completed_at": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "FraudAction": {
+        "enum": [
+          "Approve",
+          "Challenge",
+          "Review",
+          "Block"
+        ],
+        "type": "string"
       },
       "FraudAlertDto": {
         "type": "object",
@@ -1842,52 +1875,77 @@
             "type": "string",
             "format": "uuid"
           },
-          "merchant_external_id": {
-            "type": "string",
-            "nullable": true
+          "merchant_id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           },
           "process": {
-            "$ref": "#/components/schemas/FraudProcess"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudProcess"
+              }
+            ]
           },
           "external_txn_id": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "amount_minor": {
             "type": "integer",
             "format": "int64"
           },
           "currency": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "score": {
             "type": "integer",
             "format": "int32"
           },
           "reason_codes": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "status": {
-            "$ref": "#/components/schemas/FraudAlertStatus"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudAlertStatus"
+              }
+            ]
           },
           "assigned_to": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "reviewed_by": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "reviewed_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
           },
           "notes": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "expires_at": {
             "type": "string",
@@ -1900,443 +1958,44 @@
         },
         "additionalProperties": false
       },
-      "AddBlacklistEntryRequest": {
+      "FraudAlertResolveBody": {
         "type": "object",
         "properties": {
-          "scope": {
-            "$ref": "#/components/schemas/FraudRuleScope"
-          },
-          "tenant_id": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "entry_type": {
-            "$ref": "#/components/schemas/BlacklistEntryType"
-          },
-          "value": {
-            "type": "string",
-            "nullable": true
-          },
-          "display_value": {
-            "type": "string",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string",
-            "nullable": true
-          },
-          "expires_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
+          "notes": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         },
         "additionalProperties": false
       },
-      "BlacklistEntryDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "scope": {
-            "$ref": "#/components/schemas/FraudRuleScope"
-          },
-          "tenant_id": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "entry_type": {
-            "$ref": "#/components/schemas/BlacklistEntryType"
-          },
-          "display_value": {
-            "type": "string",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string",
-            "nullable": true
-          },
-          "expires_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "is_active": {
-            "type": "boolean"
-          },
-          "created": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "additionalProperties": false
-      },
-      "FraudAlertDtoPaginatedList": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FraudAlertDto"
-            },
-            "nullable": true
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total_pages": {
-            "type": "integer",
-            "format": "int32",
-            "readOnly": true
-          },
-          "total_count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "has_previous_page": {
-            "type": "boolean",
-            "readOnly": true
-          },
-          "has_next_page": {
-            "type": "boolean",
-            "readOnly": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "BlacklistEntryDtoPaginatedList": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BlacklistEntryDto"
-            },
-            "nullable": true
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total_pages": {
-            "type": "integer",
-            "format": "int32",
-            "readOnly": true
-          },
-          "total_count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "has_previous_page": {
-            "type": "boolean",
-            "readOnly": true
-          },
-          "has_next_page": {
-            "type": "boolean",
-            "readOnly": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "FraudCheckLogDtoPaginatedList": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FraudCheckLogDto"
-            },
-            "nullable": true
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total_pages": {
-            "type": "integer",
-            "format": "int32",
-            "readOnly": true
-          },
-          "total_count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "has_previous_page": {
-            "type": "boolean",
-            "readOnly": true
-          },
-          "has_next_page": {
-            "type": "boolean",
-            "readOnly": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "FraudRuleDtoPaginatedList": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FraudRuleDto"
-            },
-            "nullable": true
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total_pages": {
-            "type": "integer",
-            "format": "int32",
-            "readOnly": true
-          },
-          "total_count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "has_previous_page": {
-            "type": "boolean",
-            "readOnly": true
-          },
-          "has_next_page": {
-            "type": "boolean",
-            "readOnly": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "EvaluateFraudRequest": {
-        "required": [
-          "amount_minor",
-          "external_txn_id",
-          "merchant_external_id",
-          "process"
+      "FraudAlertStatus": {
+        "enum": [
+          "Open",
+          "Approved",
+          "Rejected",
+          "Expired"
         ],
-        "type": "object",
-        "properties": {
-          "process": {
-            "$ref": "#/components/schemas/FraudProcess"
-          },
-          "external_txn_id": {
-            "type": "string",
-            "nullable": true
-          },
-          "merchant_external_id": {
-            "type": "string",
-            "nullable": true
-          },
-          "amount_minor": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "currency": {
-            "type": "string",
-            "nullable": true
-          },
-          "customer": {
-            "$ref": "#/components/schemas/FraudCustomerSignals"
-          },
-          "instrument": {
-            "$ref": "#/components/schemas/FraudInstrumentSignals"
-          },
-          "context": {
-            "$ref": "#/components/schemas/FraudContextSignals"
-          },
-          "extras": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            },
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "EvaluationResultDto": {
-        "type": "object",
-        "properties": {
-          "decision_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "action": {
-            "$ref": "#/components/schemas/FraudAction"
-          },
-          "score": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "reason_codes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true
-          },
-          "matched_rule_ids": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "nullable": true
-          },
-          "challenge": {
-            "$ref": "#/components/schemas/FraudChallenge"
-          },
-          "review_ttl_seconds": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "latency_ms": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "provider_used": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
+        "type": "string"
       },
       "FraudChallenge": {
         "type": "object",
         "properties": {
           "type": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "params": {
-            "type": "object",
+            "type": [
+              "null",
+              "object"
+            ],
             "additionalProperties": {
               "type": "string"
-            },
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "FraudContextSignals": {
-        "type": "object",
-        "properties": {
-          "channel": {
-            "type": "string",
-            "nullable": true
-          },
-          "connector_code": {
-            "type": "string",
-            "nullable": true
-          },
-          "three_d_status": {
-            "type": "string",
-            "nullable": true
-          },
-          "session_id": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "FraudCustomerSignals": {
-        "type": "object",
-        "properties": {
-          "identifier": {
-            "type": "string",
-            "nullable": true
-          },
-          "email": {
-            "type": "string",
-            "nullable": true
-          },
-          "ip_address": {
-            "type": "string",
-            "nullable": true
-          },
-          "user_agent": {
-            "type": "string",
-            "nullable": true
-          },
-          "device_fingerprint": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "FraudInstrumentSignals": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "nullable": true
-          },
-          "bin": {
-            "type": "string",
-            "nullable": true
-          },
-          "last4": {
-            "type": "string",
-            "nullable": true
-          },
-          "pan_hash": {
-            "type": "string",
-            "nullable": true
-          },
-          "issuer_country": {
-            "type": "string",
-            "nullable": true
-          },
-          "holder_name": {
-            "type": "string",
-            "nullable": true
-          },
-          "exp_year": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "exp_month": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "iban_hash": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "FinalizeDecisionCommand": {
-        "required": [
-          "decision_id",
-          "outcome"
-        ],
-        "type": "object",
-        "properties": {
-          "decision_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "outcome": {
-            "$ref": "#/components/schemas/TxnOutcome"
-          },
-          "bank_response_code": {
-            "type": "string",
-            "nullable": true
-          },
-          "completed_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
+            }
           }
         },
         "additionalProperties": false
@@ -2352,50 +2011,76 @@
             "type": "string",
             "format": "uuid"
           },
-          "merchant_external_id": {
-            "type": "string",
-            "nullable": true
+          "merchant_id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           },
           "process": {
-            "$ref": "#/components/schemas/FraudProcess"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudProcess"
+              }
+            ]
           },
           "external_txn_id": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "amount_minor": {
             "type": "integer",
             "format": "int64"
           },
           "currency": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "score": {
             "type": "integer",
             "format": "int32"
           },
           "decision": {
-            "$ref": "#/components/schemas/FraudAction"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudAction"
+              }
+            ]
           },
           "reason_codes": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "matched_rule_ids": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "latency_ms": {
             "type": "integer",
             "format": "int32"
           },
           "provider_used": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "outcome": {
-            "$ref": "#/components/schemas/TxnOutcome"
+            "type": "null",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TxnOutcome"
+              }
+            ]
           },
           "checked_at": {
             "type": "string",
@@ -2404,34 +2089,488 @@
         },
         "additionalProperties": false
       },
-      "UpsertMerchantPolicyItem": {
+      "FraudContextSignals": {
         "type": "object",
         "properties": {
-          "process": {
-            "$ref": "#/components/schemas/FraudProcess"
+          "channel": {
+            "type": [
+              "null",
+              "string"
+            ]
           },
-          "enabled": {
-            "type": "boolean"
+          "connector_code": {
+            "type": [
+              "null",
+              "string"
+            ]
           },
-          "reason": {
-            "type": "string",
-            "nullable": true
+          "three_d_status": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "session_id": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         },
         "additionalProperties": false
       },
-      "UpsertMerchantPolicyRequest": {
+      "FraudCustomerSignals": {
         "type": "object",
         "properties": {
-          "policies": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UpsertMerchantPolicyItem"
-            },
-            "nullable": true
+          "identifier": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ip_address": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "user_agent": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "device_fingerprint": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         },
         "additionalProperties": false
+      },
+      "FraudDashboardPeriod": {
+        "enum": [
+          "Today",
+          "Last7Days",
+          "Last30Days"
+        ],
+        "type": "string"
+      },
+      "FraudDashboardStatsDto": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudDashboardPeriod"
+              }
+            ]
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "approve": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "challenge": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "review": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "block": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "avg_score": {
+            "type": "number",
+            "format": "double"
+          },
+          "avg_latency": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "block_rate": {
+            "type": "number",
+            "format": "double"
+          },
+          "open_alerts_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "trend_buckets": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/FraudTrendBucketDto"
+            }
+          },
+          "decision_distribution": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/FraudDecisionDistributionDto"
+            }
+          },
+          "process_breakdown": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/FraudProcessBreakdownDto"
+            }
+          },
+          "recent_high_risk": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/FraudHighRiskLogDto"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "FraudDecisionDistributionDto": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudAction"
+              }
+            ]
+          },
+          "value": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "FraudHighRiskLogDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "merchant_id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "process": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudProcess"
+              }
+            ]
+          },
+          "external_txn_id": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "amount_minor": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "currency": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "decision": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudAction"
+              }
+            ]
+          },
+          "reason_codes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "checked_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "FraudInstrumentSignals": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "bin": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "last4": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "pan_hash": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "issuer_country": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "holder_name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "exp_year": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "exp_month": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "iban_hash": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "FraudProcess": {
+        "enum": [
+          "SanalPos",
+          "ParaTransferi",
+          "FaturaOdeme"
+        ],
+        "type": "string"
+      },
+      "FraudProcessBreakdownDto": {
+        "type": "object",
+        "properties": {
+          "process": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudProcess"
+              }
+            ]
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "review": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "block": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "FraudRuleDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenant_id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "merchant_id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "process": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudProcess"
+              }
+            ]
+          },
+          "code": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudRuleType"
+              }
+            ]
+          },
+          "expression_json": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "action": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudAction"
+              }
+            ]
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_modified": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "FraudRuleType": {
+        "enum": [
+          "Velocity",
+          "AmountThreshold",
+          "Geo",
+          "Blacklist",
+          "Custom"
+        ],
+        "type": "string"
+      },
+      "FraudTrendBucketDto": {
+        "type": "object",
+        "properties": {
+          "ts": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "approve": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "challenge": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "review": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "block": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "HttpValidationProblemDetails": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ProblemDetails"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "errors": {
+                "type": [
+                  "null",
+                  "object"
+                ],
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "additionalProperties": {}
+          }
+        ]
       },
       "MerchantFraudPolicyBundleDto": {
         "type": "object",
@@ -2441,15 +2580,19 @@
             "format": "uuid"
           },
           "merchant_external_id": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "policies": {
-            "type": "array",
+            "type": [
+              "null",
+              "array"
+            ],
             "items": {
               "$ref": "#/components/schemas/MerchantFraudPolicyDto"
-            },
-            "nullable": true
+            }
           }
         },
         "additionalProperties": false
@@ -2466,18 +2609,26 @@
             "format": "uuid"
           },
           "merchant_external_id": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "process": {
-            "$ref": "#/components/schemas/FraudProcess"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudProcess"
+              }
+            ]
           },
           "enabled": {
             "type": "boolean"
           },
           "reason": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "last_modified": {
             "type": "string",
@@ -2486,209 +2637,278 @@
         },
         "additionalProperties": false
       },
-      "CreateFraudRuleRequest": {
+      "PaginatedListOfBlacklistEntryDto": {
         "type": "object",
         "properties": {
-          "scope": {
-            "$ref": "#/components/schemas/FraudRuleScope"
+          "items": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/BlacklistEntryDto"
+            }
           },
-          "tenant_id": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "process": {
-            "$ref": "#/components/schemas/FraudProcess"
-          },
-          "code": {
-            "type": "string",
-            "nullable": true
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "type": {
-            "$ref": "#/components/schemas/FraudRuleType"
-          },
-          "expression_json": {
-            "type": "string",
-            "nullable": true
-          },
-          "action": {
-            "$ref": "#/components/schemas/FraudAction"
-          },
-          "priority": {
+          "page": {
             "type": "integer",
             "format": "int32"
           },
-          "is_active": {
-            "type": "boolean"
+          "total_pages": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "total_count": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "has_previous_page": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "has_next_page": {
+            "type": "boolean",
+            "readOnly": true
           }
         },
         "additionalProperties": false
+      },
+      "PaginatedListOfFraudAlertDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/FraudAlertDto"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_pages": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "total_count": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "has_previous_page": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "has_next_page": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PaginatedListOfFraudCheckLogDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/FraudCheckLogDto"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_pages": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "total_count": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "has_previous_page": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "has_next_page": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PaginatedListOfFraudRuleDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/FraudRuleDto"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_pages": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "total_count": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "has_previous_page": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "has_next_page": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "additionalProperties": {}
+      },
+      "TxnOutcome": {
+        "enum": [
+          "Success",
+          "Failed",
+          "Cancelled",
+          "ChargedBack"
+        ],
+        "type": "string"
       },
       "UpdateFraudRuleRequest": {
         "type": "object",
         "properties": {
           "name": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "description": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "expression_json": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "action": {
-            "$ref": "#/components/schemas/FraudAction"
+            "type": "null",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudAction"
+              }
+            ]
           },
           "priority": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "is_active": {
-            "type": "boolean",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "FraudRuleDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "scope": {
-            "$ref": "#/components/schemas/FraudRuleScope"
-          },
-          "tenant_id": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "process": {
-            "$ref": "#/components/schemas/FraudProcess"
-          },
-          "code": {
-            "type": "string",
-            "nullable": true
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "type": {
-            "$ref": "#/components/schemas/FraudRuleType"
-          },
-          "expression_json": {
-            "type": "string",
-            "nullable": true
-          },
-          "action": {
-            "$ref": "#/components/schemas/FraudAction"
-          },
-          "priority": {
-            "type": "integer",
+            "type": [
+              "null",
+              "integer"
+            ],
             "format": "int32"
           },
           "is_active": {
-            "type": "boolean"
-          },
-          "created": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "last_modified": {
-            "type": "string",
-            "format": "date-time"
+            "type": [
+              "null",
+              "boolean"
+            ]
           }
         },
         "additionalProperties": false
       },
-      "BlacklistEntryType": {
-        "enum": [
-          "card",
-          "email",
-          "ip",
-          "device",
-          "iban",
-          "merchant_external_id"
-        ],
-        "type": "string"
-      },
-      "FraudAction": {
-        "enum": [
-          "approve",
-          "challenge",
-          "review",
-          "block"
-        ],
-        "type": "string"
-      },
-      "FraudAlertStatus": {
-        "enum": [
-          "open",
-          "approved",
-          "rejected",
-          "expired"
-        ],
-        "type": "string"
-      },
-      "FraudProcess": {
-        "enum": [
-          "sanal_pos",
-          "para_transferi",
-          "fatura_odeme"
-        ],
-        "type": "string"
-      },
-      "FraudRuleScope": {
-        "enum": [
-          "global",
-          "tenant"
-        ],
-        "type": "string"
-      },
-      "FraudRuleType": {
-        "enum": [
-          "velocity",
-          "amount_threshold",
-          "geo",
-          "blacklist",
-          "custom"
-        ],
-        "type": "string"
-      },
-      "TxnOutcome": {
-        "enum": [
-          "success",
-          "failed",
-          "cancelled",
-          "charged_back"
-        ],
-        "type": "string"
-      },
-      "ResolveBody": {
+      "UpsertMerchantPolicyItem": {
         "type": "object",
         "properties": {
-          "notes": {
-            "type": "string",
-            "nullable": true
+          "process": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FraudProcess"
+              }
+            ]
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpsertMerchantPolicyRequest": {
+        "type": "object",
+        "properties": {
+          "policies": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/UpsertMerchantPolicyItem"
+            }
           }
         },
         "additionalProperties": false
@@ -2697,17 +2917,17 @@
     "securitySchemes": {
       "bearerAuth": {
         "type": "http",
+        "description": "Keycloak JWT. Format: `Authorization: Bearer <token>`.",
         "scheme": "bearer",
-        "bearerFormat": "JWT",
-        "description": "Identity servisinden alinan Keycloak JWT. Format: `Authorization: Bearer <token>`. Token alma: POST /api/v1/auth/{slug}/token"
+        "bearerFormat": "JWT"
       },
       "oauth2": {
         "type": "oauth2",
-        "description": "Keycloak Authorization Code (PKCE) — Swagger UI uzerinden login.",
+        "description": "Keycloak Authorization Code (PKCE) — Swagger UI interaktif login.",
         "flows": {
           "authorizationCode": {
-            "authorizationUrl": "http://keycloak:8080/realms/payven/protocol/openid-connect/auth",
-            "tokenUrl": "http://keycloak:8080/realms/payven/protocol/openid-connect/token",
+            "authorizationUrl": "http://localhost:8080/realms/payven/protocol/openid-connect/auth",
+            "tokenUrl": "http://localhost:8080/realms/payven/protocol/openid-connect/token",
             "scopes": {
               "openid": "OpenID Connect",
               "profile": "User profile",
@@ -2882,6 +3102,9 @@
   "security": [
     {
       "bearerAuth": []
+    },
+    {
+      "oauth2": []
     }
   ],
   "tags": [
@@ -2890,20 +3113,15 @@
       "x-displayName": "Platform Fraud Uyarıları"
     },
     {
-      "name": "PlatformFraudBlacklist",
-      "x-displayName": "Platform Kara Liste"
-    },
-    {
-      "name": "PlatformFraudRules",
-      "x-displayName": "Platform Fraud Kuralları"
-    },
-    {
       "name": "TenantFraudAlerts",
       "x-displayName": "Fraud Uyarıları"
     },
     {
       "name": "TenantFraudBlacklist",
       "x-displayName": "Kara Liste"
+    },
+    {
+      "name": "TenantFraudDashboard"
     },
     {
       "name": "TenantFraudLogs",

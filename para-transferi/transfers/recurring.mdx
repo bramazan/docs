@@ -12,7 +12,7 @@ flowchart LR
     A[POST /recurringtransfers<br/>schedule + alıcı + tutar] --> B[is_active: true]
     B -->|Cron tetikleyici| C[Yeni transfer<br/>oluşturulur]
     C --> D[Standart 4-eyes<br/>akışı]
-    D --> E[transfer.succeeded<br/>veya .failed webhook]
+    D --> E[transfer.completed<br/>veya .failed webhook]
 ```
 
 Her takvim tetiklemesinde Payven, sizin adınıza yeni bir transfer **otomatik oluşturur** (`POST /transfers/bulk/create` muadili). Transferin **onay ve gönderim** adımları (4-eyes) operatör eylemiyle veya konsol otomasyonuyla yapılır.
@@ -129,4 +129,4 @@ Tetikleme anında kaynak hesapta yeterli bakiye yoksa transfer **`failed`** stat
 
 ## Webhook olayları
 
-Tekrarlayan kayıt **kendisi** olay yayınlamaz; ancak ürettiği her transfer için standart `transfer.created` / `.succeeded` / `.failed` olayları yayınlanır. Webhook payload'unda `data.recurring_transfer_id` alanı, hangi tekrarlayan kayıttan geldiğini gösterir.
+Tekrarlayan kayıt **kendisi** olay yayınlamaz; ancak ürettiği her transfer terminal sonuca ulaştığında standart `transfer.completed` / `.delivered` / `.failed` olayları yayınlanır. Üretilen transferi tekrarlayan kayda bağlamak için transferin `external_id`'sini kendi tarafınızda eşleyin.

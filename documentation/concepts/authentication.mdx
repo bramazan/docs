@@ -21,7 +21,7 @@ sequenceDiagram
     participant API as Ürün API (Sanal POS / Para Transferi / Fraud)
 
     App->>Id: POST /auth/{slug}/token<br/>{ client_id, client_secret }
-    Id-->>App: { access_token, refresh_token, expires_in: 300, ... }
+    Id-->>App: { token: { access_token, refresh_token, expires_in: 300, ... }, challenge: null }
     Note over App: access_token cache'le<br/>5 dakika geçerli
 
     App->>API: POST /payments<br/>Authorization: Bearer <access_token>
@@ -54,23 +54,31 @@ curl https://identity.payven.com.tr/api/v1/auth/payven/token \
 
 ```json
 {
-  "access_token":        "eyJhbGciOiJSUzI1NiI...",
-  "refresh_token":       "eyJhbGciOiJIUzI1NiI...",
-  "expires_in":          300,
-  "refresh_expires_in":  0,
-  "token_type":          "Bearer",
-  "scope":               "openid profile email"
+  "token": {
+    "access_token":        "eyJhbGciOiJSUzI1NiI...",
+    "refresh_token":       "eyJhbGciOiJIUzI1NiI...",
+    "expires_in":          300,
+    "refresh_expires_in":  0,
+    "token_type":          "Bearer",
+    "scope":               "openid profile email"
+  },
+  "challenge": null
 }
 ```
 
+Yanıt `{ token, challenge }` zarfındadır. `client_credentials` akışında `challenge` **her zaman
+`null`** gelir — bu alan yalnızca kullanıcı login'inde (OTP zorunlu tenant'larda) dolar.
+Token alanlarını `token` nesnesinin içinden okuyun.
+
 | Alan | Anlam |
 |---|---|
-| `access_token` | API çağrılarında kullanacağınız Bearer token (imzalı JWT formatında) |
-| `refresh_token` | Access token expire olunca yenisini almak için |
-| `expires_in` | Access token kaç saniye geçerli (varsayılan **300s = 5 dakika**) |
-| `refresh_expires_in` | Refresh token süresi (`0` = idle timeout uygulanır, bkz. tablo) |
-| `token_type` | Daima `Bearer` |
-| `scope` | Tahsis edilen scope'lar (kimlik bilgisi üst kümesi). Endpoint-bazlı yetki bu alan üzerinden değil, kullanıcı/anahtar rollerinizden çözümlenir |
+| `token.access_token` | API çağrılarında kullanacağınız Bearer token (imzalı JWT formatında) |
+| `token.refresh_token` | Access token expire olunca yenisini almak için |
+| `token.expires_in` | Access token kaç saniye geçerli (varsayılan **300s = 5 dakika**) |
+| `token.refresh_expires_in` | Refresh token süresi (`0` = idle timeout uygulanır, bkz. tablo) |
+| `token.token_type` | Daima `Bearer` |
+| `token.scope` | Tahsis edilen scope'lar (kimlik bilgisi üst kümesi). Endpoint-bazlı yetki bu alan üzerinden değil, kullanıcı/anahtar rollerinizden çözümlenir |
+| `challenge` | `client_credentials` akışında daima `null` (OTP yalnız kullanıcı login'inde) |
 
 ## 2. Adım — API'yi çağır
 
@@ -108,6 +116,11 @@ curl https://identity.payven.com.tr/api/v1/auth/payven/refresh \
 ```
 
 Yanıt yine `access_token` + (rotasyonlu) `refresh_token` döner. Eski `refresh_token` artık geçersizdir.
+
+<Note>
+`/refresh` yanıtı **zarfsız** (düz) token nesnesidir: `{ access_token, refresh_token, expires_in, ... }`.
+Zarf (`{ token, challenge }`) yalnızca `/token` (ve login) endpoint'lerinde kullanılır.
+</Note>
 
 ## Token süreleri
 
@@ -160,9 +173,10 @@ class PayvenClient {
     });
     if (!res.ok) throw new Error(`Token alınamadı: ${res.status}`);
     const data = await res.json();
-    this.accessToken = data.access_token;
-    this.refreshToken = data.refresh_token;
-    this.expiresAt = Date.now() + data.expires_in * 1000;
+    // /token yanıtı { token, challenge } zarfındadır
+    this.accessToken = data.token.access_token;
+    this.refreshToken = data.token.refresh_token;
+    this.expiresAt = Date.now() + data.token.expires_in * 1000;
     return this.accessToken;
   }
 
@@ -223,7 +237,7 @@ class PayvenClient:
             json={"client_id": self.client_id, "client_secret": self.client_secret},
         )
         r.raise_for_status()
-        data = r.json()
+        data = r.json()["token"]  # /token yanıtı {token, challenge} zarfında
         self.access_token = data["access_token"]
         self.refresh_token = data["refresh_token"]
         self.expires_at = time.time() + data["expires_in"]
@@ -271,8 +285,10 @@ public class PayvenClient
                 $"{_identityBase}/api/v1/auth/{_slug}/token",
                 new { client_id = _clientId, client_secret = _clientSecret }, ct);
             resp.EnsureSuccessStatusCode();
-            var data = await resp.Content.ReadFromJsonAsync<TokenResponse>(cancellationToken: ct);
-            _accessToken = data!.access_token;
+            // /token yanıtı { token, challenge } zarfında
+            var envelope = await resp.Content.ReadFromJsonAsync<TokenEnvelope>(cancellationToken: ct);
+            var data = envelope!.token;
+            _accessToken = data.access_token;
             _refreshToken = data.refresh_token;
             _expiresAt = DateTimeOffset.UtcNow.AddSeconds(data.expires_in);
             return _accessToken;
@@ -293,6 +309,7 @@ public class PayvenClient
         return true;
     }
 
+    private record TokenEnvelope(TokenResponse token);
     private record TokenResponse(string access_token, string refresh_token, int expires_in);
 }
 ```
@@ -320,6 +337,11 @@ type tokenResponse struct {
     AccessToken  string `json:"access_token"`
     RefreshToken string `json:"refresh_token"`
     ExpiresIn    int    `json:"expires_in"`
+}
+
+// /token yanıtı { token, challenge } zarfında; /refresh düz tokenResponse döner.
+type tokenEnvelope struct {
+    Token tokenResponse `json:"token"`
 }
 
 func (c *Client) GetToken() (string, error) {
@@ -362,9 +384,10 @@ class PayvenClient {
             "client_id"     => $this->clientId,
             "client_secret" => $this->clientSecret,
         ]);
-        $this->accessToken = $resp["access_token"];
-        $this->refreshToken = $resp["refresh_token"];
-        $this->expiresAt = time() + $resp["expires_in"];
+        $token = $resp["token"]; // /token yanıtı {token, challenge} zarfında
+        $this->accessToken = $token["access_token"];
+        $this->refreshToken = $token["refresh_token"];
+        $this->expiresAt = time() + $token["expires_in"];
         return $this->accessToken;
     }
 

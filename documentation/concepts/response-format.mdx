@@ -19,7 +19,7 @@ Content-Type: application/json
   "transaction_id": "8e3f5c12-9a7b-4c8d-bc4e-2c963f66afa6",
   "status": "completed",
   "extra_properties": {
-    "processed_at":  "2026-05-03T12:34:58.123+00:00",
+    "processed_at":  "2026-05-03T15:34:58.123+03:00",
     "auth_code":     "123456",
     "host_reference": "PAYVEN-REF-789"
   }
@@ -151,13 +151,14 @@ Banka reddi de bir hata response'udur — `422 Unprocessable Entity` + `applicat
 
 ## Tarih ve zaman
 
-Tüm tarih alanları **ISO 8601** formatında, **UTC offset** (`+00:00`) ile döner:
+Tüm tarih alanları **ISO 8601** formatında, **Türkiye saati** (`+03:00` offset) ile döner:
 
 ```
-2026-05-03T12:34:56.789+00:00
+2026-05-03T15:34:56.789+03:00
 ```
 
-İstek tarafında lokal offset göndermek serbesttir; Payven UTC'ye normalize eder:
+Veriler dahili olarak UTC saklanır; dönüşüm API katmanında otomatik yapılır. İstek tarafında
+offset'i açıkça gönderin (Türkiye için `+03:00`) — offset verilmezse değer **UTC kabul edilir**:
 
 ```
 2026-05-03T15:34:56.789+03:00

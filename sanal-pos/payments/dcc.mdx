@@ -45,8 +45,8 @@ Standart `POST /payments` veya `POST /payments/3d/init` isteği yapın. Payven y
     "dcc_alternative_amount":   "480",
     "dcc_exchange_rate":        "31.25",
     "dcc_markup_percent":       "3.5",
-    "dcc_offer_expires_at":     "2026-05-03T12:40:00.000+00:00",
-    "processed_at":             "2026-05-03T12:35:00.123+00:00"
+    "dcc_offer_expires_at":     "2026-05-03T12:40:00.000+03:00",
+    "processed_at":             "2026-05-03T12:35:00.123+03:00"
   }
 }
 ```
@@ -104,7 +104,7 @@ curl -X POST https://vpos.payven.com.tr/api/v1/payments/8e3f5c12-9a7b-4c8d-bc4e-
   "transaction_id": "8e3f5c12-...",
   "status":         "completed",
   "extra_properties": {
-    "processed_at":          "2026-05-03T12:38:01.234+00:00",
+    "processed_at":          "2026-05-03T12:38:01.234+03:00",
     "auth_code":             "123456",
     "host_reference":        "PAYVEN-REF-789",
     "dcc_charged_currency":  "USD",

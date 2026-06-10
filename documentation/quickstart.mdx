@@ -35,7 +35,8 @@ const tokenRes = await fetch(
     }),
   },
 );
-const { access_token } = await tokenRes.json();
+const { token } = await tokenRes.json(); // yanıt { token, challenge } zarfında
+const access_token = token.access_token;
 ```
 
 ```python Python
@@ -48,7 +49,7 @@ token_res = httpx.post(
         "client_secret": os.environ["PAYVEN_CLIENT_SECRET"],
     },
 )
-access_token = token_res.json()["access_token"]
+access_token = token_res.json()["token"]["access_token"]  # yanıt {token, challenge} zarfında
 ```
 </CodeGroup>
 
@@ -56,12 +57,15 @@ Yanıt:
 
 ```json
 {
-  "access_token":       "eyJhbGciOiJSUzI1NiI...",
-  "refresh_token":      "eyJhbGciOiJIUzI1NiI...",
-  "expires_in":         300,
-  "refresh_expires_in": 0,
-  "token_type":         "Bearer",
-  "scope":              "openid profile email"
+  "token": {
+    "access_token":       "eyJhbGciOiJSUzI1NiI...",
+    "refresh_token":      "eyJhbGciOiJIUzI1NiI...",
+    "expires_in":         300,
+    "refresh_expires_in": 0,
+    "token_type":         "Bearer",
+    "scope":              "openid profile email"
+  },
+  "challenge": null
 }
 ```
 
@@ -187,7 +191,7 @@ Başarılı yanıt (`HTTP 200`):
   "transaction_id": "8e3f5c12-9a7b-4c8d-bc4e-2c963f66afa6",
   "status":         "completed",
   "extra_properties": {
-    "processed_at":            "2026-05-03T12:34:58.123+00:00",
+    "processed_at":            "2026-05-03T12:34:58.123+03:00",
     "auth_code":               "123456",
     "host_reference":          "PAYVEN-REF-789",
     "provider_transaction_id": "9f3d2b8e-..."

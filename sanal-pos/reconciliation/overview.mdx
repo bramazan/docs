@@ -54,13 +54,13 @@ curl -X POST https://vpos.payven.com.tr/api/v1/reconciliations/start \
     "scope":               "connector",
     "connector_config_id": "cfg_garanti_prod-001",
     "period":              "daily",
-    "period_start":        "2026-05-03T00:00:00+00:00",
+    "period_start":        "2026-05-03T00:00:00+03:00",
     "bank_transactions": [
       {
         "bank_transaction_id": "GAR-AUTH-789-001",
         "amount":              15000,
         "status":              "approved",
-        "transaction_date":    "2026-05-03T12:34:58+00:00",
+        "transaction_date":    "2026-05-03T12:34:58+03:00",
         "auth_code":           "123456"
       }
     ]
@@ -100,8 +100,8 @@ curl -X POST https://vpos.payven.com.tr/api/v1/reconciliations/start \
   "merchant_name":            null,
   "bank_code":                "GARANTI",
   "period":                   "daily",
-  "period_start":             "2026-05-03T00:00:00.000+00:00",
-  "period_end":               "2026-05-03T23:59:59.999+00:00",
+  "period_start":             "2026-05-03T00:00:00.000+03:00",
+  "period_end":               "2026-05-03T23:59:59.999+03:00",
   "reconciliation_date":      "2026-05-04",
   "total_db_transactions":    1247,
   "total_bank_transactions":  1245,
@@ -118,7 +118,7 @@ curl -X POST https://vpos.payven.com.tr/api/v1/reconciliations/start \
   "finalized_at":             null,
   "finalized_by":             null,
   "notes":                    null,
-  "created":                  "2026-05-04T03:00:00.000+00:00",
+  "created":                  "2026-05-04T03:00:00.000+03:00",
   "details": [
     {
       "id":                "9f3d2b8e-...",

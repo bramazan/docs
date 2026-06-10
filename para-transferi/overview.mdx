@@ -132,12 +132,11 @@ konsoldan tanımlanan **konnektör konfigürasyonuna** göre seçilir.
 
 | Olay | Tetikleyici |
 |---|---|
-| `transfer.created` | Yeni transfer oluşturuldu (pending) |
-| `transfer.approved` | Onaylandı |
-| `transfer.rejected` | İç onayda reddedildi |
 | `transfer.completed` | Banka senkron onay verdi |
 | `transfer.delivered` | Banka asenkron kabul etti (FAST) |
 | `transfer.failed` | Banka reddi veya teknik hata |
+
+Oluşturma/onay/red adımları webhook yayınlamaz — operatör eylemleri konsol audit log'una düşer.
 
 Webhook delivery: HMAC-SHA256 imzalı, 5 retry deneme (1m / 5m / 30m / 2h / 24h, ±%20 jitter), 15sn timeout. Tüm denemeler başarısız olursa olay konsoldan manuel olarak yeniden tetiklenebilir.
 

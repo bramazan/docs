@@ -41,11 +41,11 @@ curl "https://vpos.payven.com.tr/api/v1/chargebacks?status=open&page=1&page_size
       "reason_code":       "4837",
       "bank_reference_no": "CB-GAR-789",
       "status":            "opened",
-      "response_deadline": "2026-05-22T23:59:59.000+00:00",
+      "response_deadline": "2026-05-22T23:59:59.000+03:00",
       "resolved_at":       null,
       "merchant_response": null,
       "notes":             null,
-      "created":           "2026-05-15T10:30:00.000+00:00"
+      "created":           "2026-05-15T10:30:00.000+03:00"
     }
   ],
   "page":              1,
@@ -80,7 +80,7 @@ curl -X POST https://vpos.payven.com.tr/api/v1/chargebacks \
     "currency":          "TRY",
     "reason":            "İşlem yetkisiz",
     "reason_code":       "4837",
-    "response_deadline": "2026-05-22T23:59:59+00:00",
+    "response_deadline": "2026-05-22T23:59:59+03:00",
     "bank_reference_no": "CB-GAR-789"
   }'
 ```
@@ -131,12 +131,9 @@ Chargeback'lere genellikle **7 gün** içinde yanıt verilmesi beklenir (banka a
 
 ## Webhook olayları
 
-| Olay | Açıklama |
-|---|---|
-| `chargeback.opened` | Bankadan chargeback bildirimi alındığında (kayıt oluştuğunda) |
-| `chargeback.resolved` | Chargeback sonuçlandığında (won/lost) |
-
-Detay: [Webhook Olay Kataloğu](/sanal-pos/webhooks/events#chargeback-ters-ibraz-olaylar).
+Chargeback yaşam döngüsü için müşteri webhook olayı **henüz yayınlanmaz** — kayıtları konsoldan
+veya `GET /api/v1/chargebacks` listesinden izleyin. `chargeback.opened` / `chargeback.resolved`
+olayları yol haritasındadır; bkz. [Webhook Olay Kataloğu](/sanal-pos/webhooks/events#yol-haritasi).
 
 ## Yol haritası
 

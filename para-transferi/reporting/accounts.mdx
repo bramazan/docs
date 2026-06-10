@@ -28,7 +28,7 @@ curl https://transfer.payven.com.tr/api/v1/accounts \
   -H "X-Tenant-Id: $TENANT_ID"
 ```
 
-Yanıt (sayfasız, organizasyon başına tipik olarak <50 hesap):
+Yanıt (sayfasız, organizasyon başına tipik olarak 50'den az hesap):
 
 ```json
 {
@@ -46,10 +46,10 @@ Yanıt (sayfasız, organizasyon başına tipik olarak <50 hesap):
       "available_balance":   125000000,
       "blocked_balance":     5000000,
       "total_balance":       130000000,
-      "balance_updated_at":  "2026-05-07T10:35:00.123+00:00",
+      "balance_updated_at":  "2026-05-07T10:35:00.123+03:00",
       "supported_transfer_types": ["fast", "eft", "remittance"],
       "is_active":           true,
-      "created":             "2026-01-15T10:00:00.000+00:00"
+      "created":             "2026-01-15T10:00:00.000+03:00"
     }
   ],
   "total_count": 4

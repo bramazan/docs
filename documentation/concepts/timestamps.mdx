@@ -1,111 +1,125 @@
 ---
 title: "Tarih ve Zaman"
-description: "ISO-8601 ve UTC kullanımı."
+description: "ISO-8601 format ve Türkiye saati (+03:00) konvansiyonu."
 ---
 
-Payven, tüm tarih-zaman alanlarında **ISO-8601** formatını ve **UTC** zaman dilimini kullanır.
+Payven, tüm tarih-zaman alanlarında **ISO-8601** formatını kullanır. Yanıtlardaki tarih-zaman
+alanları **her zaman Türkiye saati (+03:00 offset)** ile döner; veriler dahili olarak UTC
+saklanır, dönüşüm API katmanında otomatik yapılır.
 
 ## Format
 
 ```
-2026-05-03T12:34:56.789+00:00
+2026-05-03T15:34:56.789+03:00
 ```
 
-Yanıtlardaki tarih alanları her zaman explicit offset (`+HH:mm`) ile döner — UTC için `+00:00`. İstek tarafında hem `Z` hem `+00:00` kabul edilir; ikisi aynı anlamdadır.
+Yanıtlardaki tarih alanları her zaman explicit offset ile döner — Türkiye saati için `+03:00`.
 
 | Bölüm | Anlam |
 |---|---|
 | `2026-05-03` | Tarih (yıl-ay-gün) |
 | `T` | Tarih ve saat ayırıcısı |
-| `12:34:56.789` | Saat:dakika:saniye.milisaniye |
-| `+00:00` | UTC offset (gönderirken `Z` de kabul edilir) |
+| `15:34:56.789` | Saat:dakika:saniye.milisaniye |
+| `+03:00` | Türkiye saat dilimi offset'i |
 
-## Yerel saat gönderme
+## İstek tarafında tarih gönderme
 
-Yerel saat dilimi göndermek istiyorsanız offset ekleyin. Türkiye için `+03:00`:
+İstek gövdesinde veya query parametrelerinde tarih gönderirken **offset'i açıkça belirtin**.
+Türkiye saati için `+03:00`:
 
 ```
 2026-05-03T15:34:56+03:00
 ```
 
-Bu değer Payven tarafında otomatik olarak UTC'ye çevrilip saklanır.
+<Warning>
+Offset vermezseniz değer **UTC kabul edilir** (`2026-05-03T15:34:56` → UTC 15:34). Türkiye
+saatiyle çalışıyorsanız bu 3 saatlik kaymaya yol açar. Bu yüzden her zaman `+03:00` offset'ini
+açıkça gönderin. `Z` veya `+00:00` gönderirseniz değer UTC olarak yorumlanır — ikisi aynı
+anlamdadır.
+</Warning>
+
+Gönderdiğiniz değer hangi offset'le gelirse gelsin Payven tarafında UTC'ye çevrilip saklanır;
+yanıtlar yine Türkiye saatiyle döner.
 
 ## Yanıtlarda
 
-Tüm yanıtlardaki tarih alanları UTC olarak döner:
+Tüm yanıtlardaki tarih alanları Türkiye saati (`+03:00`) olarak döner:
 
 ```json
 {
   "id":         "8e3f5c12-...",
-  "created_at": "2026-05-03T12:34:56.789+00:00",
-  "updated_at": "2026-05-03T12:35:01.234+00:00"
+  "created_at": "2026-05-03T15:34:56.789+03:00",
+  "updated_at": "2026-05-03T15:35:01.234+03:00"
 }
 ```
 
-## Yerel saatte gösterme
+## Farklı saat diliminde gösterme
 
-Müşteriye gösterirken kendi tarafınızda yerelleştirin:
+Değerler explicit offset taşıdığı için herhangi bir saat dilimine güvenle çevirebilirsiniz.
+Türkiye dışında bir kullanıcıya gösterirken kendi tarafınızda yerelleştirin:
 
 <CodeGroup>
 ```csharp C#
-var utc = DateTimeOffset.Parse("2026-05-03T12:34:56.789Z");
+var ts = DateTimeOffset.Parse("2026-05-03T15:34:56.789+03:00");
 var istanbul = TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time");
-var local = TimeZoneInfo.ConvertTime(utc, istanbul);
+var local = TimeZoneInfo.ConvertTime(ts, istanbul);
 
 Console.WriteLine(local.ToString("dd MMMM yyyy HH:mm", new CultureInfo("tr-TR")));
 // 03 Mayıs 2026 15:34
 ```
 
 ```javascript Node.js
-const utc = new Date("2026-05-03T12:34:56.789Z");
+const ts = new Date("2026-05-03T15:34:56.789+03:00");
 
 const formatted = new Intl.DateTimeFormat("tr-TR", {
   dateStyle: "long",
   timeStyle: "short",
   timeZone: "Europe/Istanbul",
-}).format(utc);
+}).format(ts);
 
 console.log(formatted);
 // 3 Mayıs 2026 15:34
 ```
 
 ```go Go
-utc, _ := time.Parse(time.RFC3339Nano, "2026-05-03T12:34:56.789Z")
+ts, _ := time.Parse(time.RFC3339Nano, "2026-05-03T15:34:56.789+03:00")
 istanbul, _ := time.LoadLocation("Europe/Istanbul")
-local := utc.In(istanbul)
+local := ts.In(istanbul)
 fmt.Println(local.Format("02 Jan 2006 15:04"))
 ```
 
 ```php PHP
-$utc = new DateTimeImmutable("2026-05-03T12:34:56.789Z");
-$utc->setTimezone(new DateTimeZone("Europe/Istanbul"));
-echo $utc->format("d.m.Y H:i"); // 03.05.2026 15:34
+$ts = new DateTimeImmutable("2026-05-03T15:34:56.789+03:00");
+$ts = $ts->setTimezone(new DateTimeZone("Europe/Istanbul"));
+echo $ts->format("d.m.Y H:i"); // 03.05.2026 15:34
 ```
 
 ```python Python
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-utc = datetime.fromisoformat("2026-05-03T12:34:56.789+00:00")
-istanbul = utc.astimezone(ZoneInfo("Europe/Istanbul"))
+ts = datetime.fromisoformat("2026-05-03T15:34:56.789+03:00")
+istanbul = ts.astimezone(ZoneInfo("Europe/Istanbul"))
 print(istanbul.strftime("%d.%m.%Y %H:%M"))
 ```
 </CodeGroup>
 
 ## Tarih aralığı parametreleri
 
-Liste sorgularında tarih aralığı parametreleri yine **ISO-8601 + UTC** beklenir:
+Liste sorgularında tarih aralığı parametreleri **ISO-8601 + explicit offset** ile gönderilir.
+Türkiye saatiyle çalışıyorsanız `+03:00` ekleyin:
 
 ```
-GET /api/v1/transactions?from=2026-05-01T00:00:00Z&to=2026-05-31T23:59:59Z
+GET /api/v1/transactions?from=2026-05-01T00:00:00+03:00&to=2026-05-31T23:59:59+03:00
 ```
 
 | Parametre | Yön | Tip |
 |---|---|---|
-| `from` | dahil | UTC tarih-zaman |
-| `to` | dahil | UTC tarih-zaman |
+| `from` | dahil | ISO-8601 tarih-zaman (offset zorunlu önerilir) |
+| `to` | dahil | ISO-8601 tarih-zaman (offset zorunlu önerilir) |
 
-Yerel saat dilimini sorguya çevirmeyi unutmayın — örn. "1 Mayıs 2026 Türkiye saati ile 00:00" → `2026-04-30T21:00:00Z`.
+Offset vermezseniz değer UTC kabul edilir — "1 Mayıs 2026 Türkiye saatiyle 00:00" demek
+istiyorsanız `2026-05-01T00:00:00+03:00` gönderin (UTC karşılığı `2026-04-30T21:00:00Z`'dir).
 
 <Tip>
 Mutabakat ve raporlama için **gün başı/sonu** sınırlarını organizasyonunuzun tercih ettiği zaman dilimine göre konsoldan ayarlayabilirsiniz. Detay: [Mutabakat → Yaşam Döngüsü](/sanal-pos/reconciliation/lifecycle).

@@ -20,42 +20,48 @@ Yanıt — şehir listesi (81 il):
 
 ```json
 [
-  { "id": "abc-...", "code": "34", "name": "İstanbul" },
-  { "id": "def-...", "code": "06", "name": "Ankara" },
-  { "id": "ghi-...", "code": "35", "name": "İzmir" }
+  { "id": "abc-...", "code": "34", "name": "İstanbul", "country": "TUR", "is_active": true },
+  { "id": "def-...", "code": "06", "name": "Ankara",   "country": "TUR", "is_active": true },
+  { "id": "ghi-...", "code": "35", "name": "İzmir",    "country": "TUR", "is_active": true }
 ]
 ```
 
 | Alan | Açıklama |
 |---|---|
-| `id` | UUID — districts sorgusunda kullanılır |
-| `code` | Plaka kodu (`34`, `06`, ...) |
+| `id` | UUID |
+| `code` | Plaka kodu (`34`, `06`, ...) — districts sorgusunda `city_code` filtresi olarak kullanılır |
 | `name` | Türkçe isim |
+| `country` | Ülke kodu (`TUR`) |
+| `is_active` | Aktiflik |
+
+Query parametreleri: `code` (plaka filtresi), `search_term`, `include_inactive`.
 
 ## İlçeler
 
 ```http
-GET /api/v1/lookups/districts?city_id={uuid}
+GET /api/v1/lookups/districts?city_code={plaka}
 ```
 
 İlçeleri **şehir bazında** çekersiniz. Tüm ilçeleri tek seferde almak mümkün ama 950+ kayıt — seçilen şehre göre lazy-load önerilir.
 
 ```bash
-curl "https://identity.payven.com.tr/api/v1/lookups/districts?city_id=abc-..." \
+curl "https://identity.payven.com.tr/api/v1/lookups/districts?city_code=34" \
   -H "Authorization: Bearer $PAYVEN_TOKEN"
 ```
 
 ```json
 [
-  { "id": "...", "name": "Kadıköy",   "city_id": "abc-..." },
-  { "id": "...", "name": "Beşiktaş", "city_id": "abc-..." },
-  { "id": "...", "name": "Şişli",     "city_id": "abc-..." }
+  { "id": "...", "city_code": "34", "name": "Kadıköy",  "is_active": true },
+  { "id": "...", "city_code": "34", "name": "Beşiktaş", "is_active": true },
+  { "id": "...", "city_code": "34", "name": "Şişli",    "is_active": true }
 ]
 ```
 
 | Query parametresi | Tip | Açıklama |
 |---|---|---|
-| `city_id` | UUID | Filtre — boş bırakılırsa tüm ilçeler döner |
+| `city_code` | string | Plaka kodu filtresi (`34`) — boş bırakılırsa tüm ilçeler döner |
+| `search_term` | string | İsim araması |
+| `include_inactive` | bool | Pasif kayıtları da getir |
 
 ## Caching
 

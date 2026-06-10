@@ -55,7 +55,8 @@ curl -X POST https://vpos.payven.com.tr/api/v1/payments/3d/init \
       "id":    "cust-001",
       "email": "user@example.com"
     },
-    "callback_url": "https://example.com/3ds/return"
+    "success_url": "https://example.com/3ds/basarili",
+    "fail_url":    "https://example.com/3ds/basarisiz"
   }'
 ```
 

@@ -7,130 +7,104 @@ Para Transferi şu anda **3 olay tipi** yayınlar. Subscription oluştururken `e
 
 ## Genel yapı
 
-Tüm olaylar şu yapıda gönderilir:
+Olay tipi ve teslimat metadata'sı **HTTP header'larında** taşınır; gövde olayın kendisidir
+(**düz/flat** JSON — ayrıca bir `data` zarfı yoktur):
 
-```json
-{
-  "id":         "evt_8e3f5c129a7b4c8dbc4e",
-  "type":       "transfer.succeeded",
-  "created_at": "2026-05-03T12:34:58.123+00:00",
-  "data": { /* olaya özel payload — aşağıda */ }
-}
-```
+| Header | Açıklama |
+|---|---|
+| `X-Payven-Event` | Olay tipi (`transfer.completed`, `transfer.delivered`, `transfer.failed`) |
+| `X-Payven-Event-Id` | Olay kimliği — idempotency için kullanın. **Aynı olay birden fazla kez gönderilebilir** ama event id aynıdır. |
+| `X-Payven-Delivery-Id` | Bu teslimat denemesinin kimliği (retry'da değişir) |
+| `X-Payven-Signature` | `sha256=<hex>` HMAC imzası — bkz. [İmza Doğrulama](/para-transferi/webhooks/overview#imza) |
+| `X-Payven-Timestamp` | İmza zaman damgası (Unix saniye) |
+
+## Payload ortak alanları
+
+Tüm olaylar aynı gövde şemasını kullanır:
 
 | Alan | Açıklama |
 |---|---|
-| `id` | Olay kimliği — idempotency için kullanın. **Aynı olay birden fazla kez gönderilebilir** ama `id` aynıdır. |
-| `type` | Olay tipi |
-| `created_at` | Olayın Payven tarafında oluşturulma zamanı (UTC, ISO 8601) |
-| `data` | Olaya özel payload |
-
-## `data` ortak alanları
-
-Tüm `data` payload'ları aşağıdaki alanları içerir:
-
-| Alan | Açıklama |
-|---|---|
+| `event_type` | Olay tipi (header'daki `X-Payven-Event` ile aynı) |
 | `transfer_id` | Transferin Payven kimliği (UUID) |
-| `external_id` | Sizin sisteminizdeki transfer kimliği |
-| `merchant_id` | Transferin merchant kimliği |
-| `status` | Transfer mevcut durumu |
+| `tenant_id` | Tenant kimliği |
+| `merchant_id` | Transferin merchant kimliği (UUID, opsiyonel) |
+| `external_merchant_id` | Merchant'ın dış (string) kimliği |
+| `status` | Transfer mevcut durumu (snake_case string) |
 | `amount` | Tutar (kuruş) |
-| `currency` | Para birimi (`"TRY"`) |
-| `transfer_type` | `fast`, `eft`, `remittance` veya `credit_card` |
+| `currency` | Para birimi (`"try"`) |
+| `external_id` | Sizin sisteminizdeki transfer kimliği |
+| `description` | Transfer açıklaması |
+| `message` | Banka/konnektör mesajı (özellikle hatada anlamlı) |
+| `receipt_no` | Makbuz numarası (başarıda dolu) |
+| `occurred_at` | Olayın gerçekleşme zamanı (+03:00 Türkiye saati) |
 
 ## Olay tipleri
 
-### `transfer.created`
+### `transfer.completed`
 
-**Tetikleyici:** Yeni transfer oluşturuldu (`POST /transfers/bulk/create` ile, `pending` durumda).
-
-```json
-{
-  "id":         "evt_...",
-  "type":       "transfer.created",
-  "created_at": "2026-05-03T12:00:00.123+00:00",
-  "data": {
-    "transfer_id":     "8e3f5c12-...",
-    "external_id":     "PAYROLL-001",
-    "merchant_id":     "3fa85f64-...",
-    "status":          "pending",
-    "amount":          1500000,
-    "currency":        "TRY",
-    "transfer_type":   "fast",
-    "scheduled_date":  "2026-05-03T12:00:00.000+00:00"
-  }
-}
-```
-
-Bu olay **operasyonel sürecinize** entegre olmak için faydalıdır: 4-eyes onay sürecinizde "yeni transfer onay bekliyor" bildirimi tetikleyebilirsiniz.
-
-### `transfer.succeeded`
-
-**Tetikleyici:** Transfer başarıyla tamamlandı (`completed` veya `delivered` → `completed` geçişi).
+**Tetikleyici:** Banka transferi **senkron** onayladı — terminal başarı.
 
 ```json
 {
-  "id":         "evt_...",
-  "type":       "transfer.succeeded",
-  "created_at": "2026-05-03T12:34:58.123+00:00",
-  "data": {
-    "transfer_id":     "8e3f5c12-...",
-    "external_id":     "PAYROLL-001",
-    "merchant_id":     "3fa85f64-...",
-    "status":          "completed",
-    "amount":          1500000,
-    "currency":        "TRY",
-    "transfer_type":   "fast",
-    "fee_amount":      350,
-    "receipt_no":      "TRF-20260503-0001",
-    "sent_date":       "2026-05-03T12:34:58.000+00:00",
-    "processed_date":  "2026-05-03T12:34:59.234+00:00",
-    "success_sender_account_id": "66666666-..."
-  }
+  "event_type":           "transfer.completed",
+  "transfer_id":          "8e3f5c12-9a7b-4c8d-bc4e-2c963f66afa6",
+  "tenant_id":            "11111111-1111-1111-1111-111111111111",
+  "merchant_id":          "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "external_merchant_id": "MRCH-001",
+  "status":               "completed",
+  "amount":               1500000,
+  "currency":             "try",
+  "external_id":          "PAYROLL-001",
+  "description":          "Mayıs maaş ödemesi",
+  "message":              "Transfer başarılı",
+  "receipt_no":           "TRF-20260503-0001",
+  "occurred_at":          "2026-05-03T15:34:58.123+03:00"
 }
 ```
 
 `receipt_no` makbuz numarasını saklayın — sonradan dekont indirme akışında kullanırsınız.
 
+### `transfer.delivered`
+
+**Tetikleyici:** Banka transferi **asenkron** kabul etti (örn. FAST) — Payven tarafında
+başarı sayılır; banka kesinleştirme bildirimi gelirse durum `completed`'a ilerler.
+
+Payload şeması `transfer.completed` ile aynıdır; `status` alanı `delivered` gelir.
+
 ### `transfer.failed`
 
-**Tetikleyici:** Banka reddi, teknik hata veya konnektör sağlık sorunu.
+**Tetikleyici:** Banka reddi, teknik hata veya konnektör sağlık sorunu — terminal başarısızlık.
 
 ```json
 {
-  "id":         "evt_...",
-  "type":       "transfer.failed",
-  "created_at": "2026-05-03T12:34:58.123+00:00",
-  "data": {
-    "transfer_id":          "8e3f5c12-...",
-    "external_id":          "PAYROLL-001",
-    "merchant_id":          "3fa85f64-...",
-    "status":               "failed",
-    "amount":               1500000,
-    "currency":             "TRY",
-    "transfer_type":        "fast",
-    "error_code":           "insufficient_balance",
-    "error_message":        "Kaynak hesapta yeterli bakiye yok",
-    "provider_error_code":  "01",
-    "retry_count":          2,
-    "processed_date":       "2026-05-03T12:34:59.234+00:00"
-  }
+  "event_type":           "transfer.failed",
+  "transfer_id":          "8e3f5c12-9a7b-4c8d-bc4e-2c963f66afa6",
+  "tenant_id":            "11111111-1111-1111-1111-111111111111",
+  "merchant_id":          "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "external_merchant_id": "MRCH-001",
+  "status":               "failed",
+  "amount":               1500000,
+  "currency":             "try",
+  "external_id":          "PAYROLL-001",
+  "description":          "Mayıs maaş ödemesi",
+  "message":              "Kaynak hesapta yeterli bakiye yok",
+  "receipt_no":           null,
+  "occurred_at":          "2026-05-03T15:34:58.123+03:00"
 }
 ```
 
-`error_code` (Payven domain kodu) ve `provider_error_code` (banka ham kodu) birlikte değerlendirilir. Tam hata kodu listesi: [Hata Kodları](/para-transferi/errors/overview).
+Hata detayı `message` alanındadır; hata kodu eşlemesi için [Hata Kodları](/para-transferi/errors/overview).
 
 ## Olay → Transfer durumu eşleşmesi
 
 ```mermaid
 stateDiagram-v2
-    [*] --> pending: transfer.created
+    [*] --> pending: (bulk/create)
     pending --> approved: (manuel approve)
     approved --> processing: (manuel send)
-    processing --> completed: transfer.succeeded
-    processing --> delivered: (asenkron)
-    delivered --> completed: transfer.succeeded
+    processing --> completed: transfer.completed
+    processing --> delivered: transfer.delivered
+    delivered --> completed: transfer.completed
     processing --> failed: transfer.failed
     pending --> rejected: (manuel reject)
     completed --> [*]
@@ -138,18 +112,19 @@ stateDiagram-v2
     rejected --> [*]
 ```
 
-Onay (`approve`) ve gönderim (`send`) şu an webhook olayı yayınlamaz — bunlar **manuel operatör eylemleri** olduğu için konsol audit log'una düşer. İleride `transfer.approved` ve `transfer.sent` olayları eklenebilir.
+Oluşturma (`bulk/create`), onay (`approve`) ve gönderim (`send`) adımları webhook olayı
+yayınlamaz — bunlar **operatör eylemleri** olduğu için konsol audit log'una düşer. Webhook
+yalnızca bankaya gönderim sonrası **terminal sonuçlarda** tetiklenir.
 
 ## Webhook subscription örneği
 
 ```bash
 curl -X POST https://transfer.payven.com.tr/api/v1/webhooks \
   -H "Authorization: Bearer $PAYVEN_TOKEN" \
-  -H "X-Tenant-Id: $TENANT_ID" \
   -H "Content-Type: application/json" \
   -d '{
     "url":    "https://example.com/webhooks/payven-transfers",
-    "events": ["transfer.created", "transfer.succeeded", "transfer.failed"]
+    "events": ["transfer.completed", "transfer.delivered", "transfer.failed"]
   }'
 ```
 
@@ -157,9 +132,7 @@ curl -X POST https://transfer.payven.com.tr/api/v1/webhooks \
 
 İleride eklenmesi planlanan olaylar:
 
-- `transfer.approved` — onaylandığında
-- `transfer.sent` — bankaya gönderildiğinde
-- `transfer.delivered` — banka asenkron kabul ettiğinde (FAST için ara durum)
+- `transfer.created` / `transfer.approved` / `transfer.sent` — yaşam döngüsünün operasyonel adımları
 - `transfer.refunded` — alıcı tarafından iade edildiğinde
 - `recurring.transfer.scheduled` — tekrarlayan transfer üretildiğinde
 
