@@ -3,8 +3,8 @@ title: "Webhook Olay Kataloğu"
 description: "Sanal POS'un yayınladığı tüm webhook olayları ve payload alanları."
 ---
 
-Sanal POS şu anda **29 olay tipi** yayınlar: işlem yaşam döngüsü (8) + recurring/subscription (6) +
-marketplace sub-merchant (3) + marketplace split (7) + settlement (5). Subscription oluştururken
+Sanal POS şu anda **31 olay tipi** yayınlar: işlem yaşam döngüsü (8) + recurring/subscription (6) +
+marketplace sub-merchant (3) + marketplace split (7) + settlement (6) + parçalı hakediş (1). Subscription oluştururken
 `events[]` dizisinde dinlemek istediklerinizi belirtirsiniz. Güncel listeyi programatik olarak
 `GET /api/v1/webhook-subscriptions/event-types` endpoint'inden alabilirsiniz.
 
@@ -182,10 +182,34 @@ Settlement olayları **feature-prefix'li** isimlendirilir (`sanalpos.settlement.
 | Olay | Tetikleyici |
 |---|---|
 | `sanalpos.settlement.created` | Gün/dönem settlement kaydı oluşturuldu |
+| `sanalpos.settlement.updated` | Rezerve — event-types listesinde yer alır, şu an yayınlanmaz (dönem sonrası düzeltmeler [devreden kalem](/sanal-pos/reporting/settlements#devreden-kalemler-carry-forward) modeliyle yeni satıra yansır) |
 | `sanalpos.settlement.processing` | Settlement işleme alındı |
 | `sanalpos.settlement.completed` | Settlement tamamlandı |
 | `sanalpos.settlement.failed` | Settlement başarısız |
 | `sanalpos.settlement.cancelled` | Settlement iptal edildi |
+
+Payload: `event_type`, `settlement_id`, `tenant_id`, `merchant_id`, `source_feature`,
+`source_code`, `currency`, `gross_amount`, `refund_amount`, `bank_commission`,
+`platform_commission`, `parent_commission_paid`, `net_amount`,
+`marketplace_commission_income`, `sub_payout_obligations`, `real_net_earning`,
+`transaction_count`, `refund_count`, `period_start`, `period_end`, `status`,
+`bank_reference`, `occurred_at`. Alan anlamları için bkz.
+[Hakediş Kayıtları](/sanal-pos/reporting/settlements#liste).
+
+## Parçalı hakediş olayı
+
+[Parçalı hakediş](/sanal-pos/reporting/split-settlements) penceresi üretildiğinde
+(bayi, para birimi, pencere) başına **tek** olay yayınlanır — status geçişleri webhook yaymaz:
+
+| Olay | Tetikleyici |
+|---|---|
+| `sanalpos.split_settlement.created` | N-saatlik hakediş pencere kaydı oluşturuldu |
+
+Payload: `event_type`, `split_settlement_id`, `tenant_id`, `merchant_id`, `period_start`
+(dahil), `period_end` (hariç), `interval_hours`, `currency`, `gross_amount`, `refund_amount`,
+`bank_commission`, `platform_commission`, `parent_commission_paid`, `net_amount`,
+`marketplace_commission_income`, `sub_payout_obligations`, `real_net_earning`,
+`transaction_count`, `refund_count`, `occurred_at`.
 
 ## Olay → İşlem durumu eşleşmesi
 

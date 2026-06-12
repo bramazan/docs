@@ -5,6 +5,22 @@ description: "Payven API'sindeki güncellemeler ve değişiklikler."
 
 Bu sayfa, Payven API'sinin tüm versiyonlarındaki breaking olmayan ve breaking change'leri kronolojik olarak listeler.
 
+<Update label="2026-06-12" description="v1">
+  ### Yeni
+  - **Parçalı Hakediş (Split Settlement)** API'si yayınlandı — bayi bazında N-saatlik pencerelerle hakediş: `GET /split-settlements`, `GET /split-settlements/{id}`, `GET /split-settlements/{id}/carry-items` + `sanalpos.split_settlement.created` webhook olayı. Modül tenant bazında açılır.
+  - `GET /settlements/{id}/carry-items` — bir hakediş satırına devreden iade/iptal kesintilerinin detayı.
+  - `GET /settlements/stats` — filtreye uyan tüm hakediş kayıtlarının status dağılımı ve toplam net tutarı.
+
+  ### İyileştirme
+  - **Orantılı komisyon iadesi:** iade/iptalde platform ve banka komisyonu artık elde tutulan tutara orantılı hesaplanır; iade edilen paya düşen komisyon hakedişe geri yansır.
+  - **Devreden kalem (carry-forward) modeli:** kapanmış döneme ait sonradan gelen iade/iptal, geçmiş hakediş satırını değiştirmek yerine bir sonraki hakediş hesabına devreder.
+  - Hakediş yanıtına `merchant_name`, `source_feature`, `parent_commission_paid`, `marketplace_commission_income`, `sub_payout_obligations`, `real_net_earning` alanları eklendi.
+  - İade ve iptal sonrası finansal kayıt işleme (komisyon/hakediş güncellemeleri) asenkron kuyruğa alındı — banka yanıt süreleri etkilenmez, geçici hatalarda otomatik telafi edilir.
+
+  ### Düzeltme
+  - İptal edilen (void) işlemlerin hakediş toplamlarına tam tersine-çevrim olarak yansımaması giderildi.
+</Update>
+
 <Update label="2026-05-03" description="v1">
   ### Yeni
   - Sanal POS modülü için `POST /payments/order-link` (Pay-by-Link) endpoint'i eklendi.

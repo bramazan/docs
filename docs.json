@@ -158,6 +158,7 @@
             "group": "Raporlama & İzleme",
             "pages": [
               "sanal-pos/reporting/settlements",
+              "sanal-pos/reporting/split-settlements",
               "sanal-pos/reporting/chargebacks"
             ]
           },

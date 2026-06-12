@@ -7620,6 +7620,59 @@
         "summary": "Settlement'ı getir"
       }
     },
+    "/api/v1/settlements/{id}/carry-items": {
+      "get": {
+        "tags": [
+          "Settlements"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SettlementCarryItemDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "operationId": "listSettlements",
+        "summary": "Settlement'ları listele"
+      }
+    },
     "/api/v1/settlements/stats": {
       "get": {
         "tags": [
@@ -15094,6 +15147,50 @@
         ],
         "type": "string"
       },
+      "SettlementCarryItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "amount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "currency": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "source_code": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "transaction_created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
       "SettlementDto": {
         "type": "object",
         "properties": {
@@ -16741,8 +16838,8 @@
         "description": "Keycloak Authorization Code (PKCE) — Swagger UI interaktif login.",
         "flows": {
           "authorizationCode": {
-            "authorizationUrl": "http://localhost:8080/realms/payven/protocol/openid-connect/auth",
-            "tokenUrl": "http://localhost:8080/realms/payven/protocol/openid-connect/token",
+            "authorizationUrl": "http://keycloak:8080/realms/payven/protocol/openid-connect/auth",
+            "tokenUrl": "http://keycloak:8080/realms/payven/protocol/openid-connect/token",
             "scopes": {
               "openid": "OpenID Connect",
               "profile": "User profile",

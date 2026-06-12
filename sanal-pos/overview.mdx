@@ -87,7 +87,8 @@ Tüm path'ler `/api/v1/` ön ekiyle başlar. Tam liste için: [API Referansı](/
 | Sorgulama | `GET /payments/{id}`, `GET /payments/{id}/query`, `GET /payments/{id}/history`, `GET /transactions`, `GET /transactions/export` | Bearer |
 | Tekrarlayan ödeme | `POST /recurring`, `GET /recurring`, `POST /recurring/{id}/cancel`, `POST /recurring/{id}/installments/{idx}/cancel` | Bearer |
 | İade listesi | `GET /refunds`, `GET /refunds/{id}` | Bearer |
-| Settlement | `GET /settlements`, `POST /settlements`, `GET /settlements/export` | Bearer |
+| Settlement | `GET /settlements`, `POST /settlements`, `GET /settlements/export`, `GET /settlements/{id}/carry-items` | Bearer |
+| Parçalı hakediş | `GET /split-settlements`, `GET /split-settlements/{id}`, `GET /split-settlements/{id}/carry-items` | Bearer |
 | Chargeback | `GET /chargebacks`, `POST /chargebacks`, `PUT /chargebacks/{id}/status` | Bearer |
 | Mutabakat | `POST /reconciliations/start`, `POST /reconciliations/{id}/finalize` | Bearer |
 | Saved Cards | `GET /cards`, `DELETE /cards/{id}` | Bearer |

@@ -12860,6 +12860,59 @@
         "summary": "Settlement'ı getir"
       }
     },
+    "/api/v1/settlements/{id}/carry-items": {
+      "get": {
+        "tags": [
+          "Settlements"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SettlementCarryItemDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "operationId": "listSettlements",
+        "summary": "Settlement'ları listele"
+      }
+    },
     "/api/v1/settlements/stats": {
       "get": {
         "tags": [
@@ -14704,6 +14757,449 @@
         },
         "operationId": "createSplit",
         "summary": "Splits oluştur"
+      }
+    },
+    "/api/v1/split-settlements/{id}/status": {
+      "put": {
+        "tags": [
+          "SplitSettlements"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/UpdateSettlementStatusRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          }
+        },
+        "operationId": "updateSplitSettlementStatus",
+        "summary": "Splitsettlements durumunu güncelle"
+      }
+    },
+    "/api/v1/split-settlements/period": {
+      "delete": {
+        "tags": [
+          "SplitSettlements"
+        ],
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "merchant_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          }
+        },
+        "operationId": "deleteSplitSettlement",
+        "summary": "DELETE SplitSettlement"
+      }
+    },
+    "/api/v1/split-settlements/regenerate": {
+      "post": {
+        "tags": [
+          "SplitSettlements"
+        ],
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "merchant_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SplitSettlementGenerationResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          }
+        },
+        "operationId": "createSplitSettlement",
+        "summary": "Splitsettlements oluştur"
+      }
+    },
+    "/api/v1/split-settlements": {
+      "get": {
+        "tags": [
+          "SplitSettlements"
+        ],
+        "parameters": [
+          {
+            "name": "merchant_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interval_hours",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "include_inactive",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "search_term",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedListOfSplitSettlementDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        },
+        "operationId": "listSplitSettlements",
+        "summary": "Splitsettlements listele"
+      }
+    },
+    "/api/v1/split-settlements/{id}": {
+      "get": {
+        "tags": [
+          "SplitSettlements"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SplitSettlementDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ProblemDetails"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        },
+        "operationId": "getSplitSettlement",
+        "summary": "Splitsettlements getir"
+      }
+    },
+    "/api/v1/split-settlements/{id}/carry-items": {
+      "get": {
+        "tags": [
+          "SplitSettlements"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SettlementCarryItemDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "operationId": "listSplitSettlements",
+        "summary": "Splitsettlements listele"
       }
     },
     "/api/v1/test-cards": {
@@ -16913,6 +17409,45 @@
         "summary": "Webhook secret'ini yenile"
       }
     },
+    "/api/v1/webhook-subscriptions/event-types": {
+      "get": {
+        "tags": [
+          "Webhooks"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        },
+        "operationId": "listWebhooks",
+        "summary": "Webhook'ları listele"
+      }
+    },
     "/api/v1/webhook-subscriptions/deliveries/{delivery_id}/replay": {
       "post": {
         "tags": [
@@ -17078,45 +17613,6 @@
         },
         "operationId": "listWebhookDeliveries",
         "summary": "Webhook teslim geçmişini getir"
-      }
-    },
-    "/api/v1/webhook-subscriptions/event-types": {
-      "get": {
-        "tags": [
-          "Webhooks"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          },
-          "503": {
-            "$ref": "#/components/responses/ServiceUnavailable"
-          }
-        },
-        "operationId": "listWebhooks",
-        "summary": "Webhook'ları listele"
       }
     }
   },
@@ -22775,6 +23271,8 @@
           "RefundGross",
           "PlatformCommissionOut",
           "BankCommissionOut",
+          "PlatformCommissionRefund",
+          "BankCommissionRefund",
           "SplitPayoutGrossOut",
           "SplitPayoutGrossIn",
           "SplitCommissionIn",
@@ -23910,6 +24408,43 @@
             ],
             "items": {
               "$ref": "#/components/schemas/SimpleRoutingRuleDto"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total_pages": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "total_count": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "has_previous_page": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "has_next_page": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PaginatedListOfSplitSettlementDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/SplitSettlementDto"
             }
           },
           "page": {
@@ -26628,6 +27163,50 @@
         ],
         "type": "string"
       },
+      "SettlementCarryItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "amount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "currency": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "source_code": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "transaction_created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
       "SettlementDto": {
         "type": "object",
         "properties": {
@@ -26982,6 +27561,131 @@
           "Refunded"
         ],
         "type": "string"
+      },
+      "SplitSettlementDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "merchant_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "merchant_name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "period_start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "period_end": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "interval_hours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currency": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "gross_amount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "refund_amount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bank_commission": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "platform_commission": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "parent_commission_paid": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "net_amount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "marketplace_commission_income": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sub_payout_obligations": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "real_net_earning": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "transaction_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "refund_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "settled_at": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "bank_reference": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "notes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SplitSettlementGenerationResult": {
+        "type": "object",
+        "properties": {
+          "created": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skipped": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
       },
       "SplitsStatsDto": {
         "type": "object",
@@ -29671,8 +30375,8 @@
         "description": "Keycloak Authorization Code (PKCE) — Swagger UI interaktif login.",
         "flows": {
           "authorizationCode": {
-            "authorizationUrl": "http://localhost:8080/realms/payven/protocol/openid-connect/auth",
-            "tokenUrl": "http://localhost:8080/realms/payven/protocol/openid-connect/token",
+            "authorizationUrl": "http://keycloak:8080/realms/payven/protocol/openid-connect/auth",
+            "tokenUrl": "http://keycloak:8080/realms/payven/protocol/openid-connect/token",
             "scopes": {
               "openid": "OpenID Connect",
               "profile": "User profile",
@@ -29964,6 +30668,9 @@
     },
     {
       "name": "Splits"
+    },
+    {
+      "name": "SplitSettlements"
     },
     {
       "name": "TestCards",
