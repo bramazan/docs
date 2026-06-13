@@ -146,6 +146,15 @@ Payload şeması işlem olaylarından farklıdır:
 | `subscription.charge.reversed` | Önceden çekilmiş taksit provider tarafında tersine çevrildi (same-day void/reversal) — ilişkili Transaction için ayrıca `void.completed` yayınlanır |
 | `subscription.charge.failed` | Önceden çekilmiş taksiti provider sonradan Error olarak raporladı — ilişkili Transaction için ayrıca `payment.failed` yayınlanır |
 
+<Note>
+**Taksit işlemlerinin `external_id`'si taksit-bazında benzersizdir.** Bir taksitin ilişkili
+işlem (Transaction) olayında (`payment.completed` / `payment.failed`) `external_id`, planın
+`external_id`'sine taksit sırası eklenerek üretilir: **`{plan_external_id}-{installment_index}`**
+(örn. plan `SUB-1001` → 2. taksit `SUB-1001-2`). Böylece her taksiti `external_id` ile ayrı ayrı
+eşleştirebilirsiniz. `subscription.*` olaylarındaki `external_id` ise **planın kendi** değeridir
+(sıra eki olmadan); taksiti `installment_index` alanından ayırt edin.
+</Note>
+
 ## Marketplace olayları
 
 ### Sub-merchant lifecycle
