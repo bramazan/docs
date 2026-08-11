@@ -15,11 +15,11 @@ X-Correlation-Id: 9f1c8e76-2a3b-4f12-9c8d-12cb24a8a8a8
 
 ```json
 {
-  "type":           "https://docs.payven.com.tr/errors/refund_exceeds_original",
-  "title":          "İade tutarı orijinali aşıyor",
+  "type":           "https://docs.payven.com.tr/errors/REFUND_AMOUNT_EXCEEDS_REMAINING",
+  "title":          "İade tutarı kalan tutarı aşıyor",
   "status":         422,
-  "code":           "refund_exceeds_original",
-  "detail":         "Toplam iade tutarı orijinal tutarı (15000 kuruş) aşamaz.",
+  "code":           "REFUND_AMOUNT_EXCEEDS_REMAINING",
+  "detail":         "İade tutarı kalan tutarı (15000 kuruş) aşamaz.",
   "instance":      "/api/v1/payments/8e3f5c12-.../refund",
   "correlation_id": "9f1c8e76-2a3b-4f12-9c8d-12cb24a8a8a8"
 }
@@ -30,7 +30,7 @@ X-Correlation-Id: 9f1c8e76-2a3b-4f12-9c8d-12cb24a8a8a8
 | `type` | Zorunlu | Hata tipinin kanonik URI'si. Aynı zamanda dokümantasyon linki olarak çalışır. |
 | `title` | Zorunlu | Kısa, insan-okur başlık (Türkçe). |
 | `status` | Zorunlu | HTTP status kodu (header ile aynı değer, gövdede yinelenir). |
-| `code` | Zorunlu | Programatik hata kodu (`snake_case`). `type` URI'sinin son segmenti. |
+| `code` | Zorunlu | Programatik hata kodu. `type` URI'sinin son segmenti. **İki format vardır:** altyapı kodları `lowercase_snake_case` (`validation_failed`), ürün/iş kuralı kodları `PV_BÜYÜK_HARF` (`PV_BANK_DECLINED`) — bkz. [Kod formatları](#kod-formatlari). |
 | `detail` | Opsiyonel | Bu özel duruma ilişkin açıklayıcı mesaj. |
 | `instance` | Opsiyonel | Hatanın oluştuğu kaynak yolu. |
 | `correlation_id` | Opsiyonel | İstek zinciri kimliği. Response header'ı `X-Correlation-Id` ile aynı. Destek talebinde paylaşın. |
@@ -39,12 +39,12 @@ X-Correlation-Id: 9f1c8e76-2a3b-4f12-9c8d-12cb24a8a8a8
 
 | HTTP | Kategori | Örnek `code` | Retry |
 |---|---|---|---|
-| `400` Bad Request | Geçersiz JSON, eksik alan, format hatası | `bad_request`, `invalid_json` | Düzeltmeden tekrarlamayın |
-| `401` Unauthorized | Token yok, geçersiz, expire | `unauthorized`, `invalid_token`, `token_expired` | Yeniden token alın |
-| `403` Forbidden | Yetki yok, lisans yok, merchant pasif | `forbidden`, `merchant_inactive`, `product_not_licensed` | Hayır — yetki/lisans çözülmeden tekrar göndermeyin |
-| `404` Not Found | Kaynak bulunamadı | `resource_not_found`, `payment_not_found` | Hayır |
-| `409` Conflict | Idempotency çakışması, durum geçişi geçersiz | `conflict`, `idempotency_key_in_use`, `invalid_state_transition` | Hayır |
-| `422` Unprocessable Entity | İş kuralı veya validasyon ihlali | `validation_failed`, `refund_exceeds_original`, `bank_declined` | Hayır — istek/iş kuralı düzeltilmeden retry yapmayın |
+| `400` Bad Request | Geçersiz gövde, eksik alan, format hatası | `bad_request`, `merchant_context_missing` | Düzeltmeden tekrarlamayın |
+| `401` Unauthorized | Token yok, geçersiz, expire | `unauthorized`, `client_unauthorized`, `refresh_token_expired` | Yeniden token alın |
+| `403` Forbidden | Yetki yok, modül kapalı | `forbidden`, `feature_not_available` | Hayır — yetki/lisans çözülmeden tekrar göndermeyin |
+| `404` Not Found | Kaynak bulunamadı | `resource_not_found` | Hayır |
+| `409` Conflict | Idempotency çakışması, durum geçişi geçersiz | `conflict`, `idempotency_key_in_use`, `invalid_state` | Hayır |
+| `422` Unprocessable Entity | İş kuralı veya validasyon ihlali | `validation_failed`, `PV_BANK_DECLINED`, `PV_CANNOT_REFUND` | Hayır — istek/iş kuralı düzeltilmeden retry yapmayın |
 | `429` Too Many Requests | Rate limit aşıldı (`Retry-After` header gönderilir) | `rate_limit_exceeded` | Backoff |
 | `500/502/503` | Sunucu / bağlantı hatası | `internal_server_error`, `bad_gateway`, `service_unavailable` | Backoff |
 | Network timeout | Ağ veya gateway timeout | — | Idempotency-Key ile |
@@ -52,10 +52,27 @@ X-Correlation-Id: 9f1c8e76-2a3b-4f12-9c8d-12cb24a8a8a8
 <Note>
 **Banka reddi de bir hata yanıtıdır.** Gateway'e ulaşmış ama banka tarafında reddedilen
 ödeme `422 Unprocessable Entity` + `application/problem+json` ile döner; gövdede
-`code: "bank_declined"` ve banka ham yanıt kodu (`provider_error_code`, örn. `"51"` —
+`code: "PV_BANK_DECLINED"` ve banka ham yanıt kodu (`provider_error_code`, örn. `"51"` —
 yetersiz bakiye) yer alır. Sonuç değerlendirmesini yalnız HTTP durum kodu üzerinden
 yapın.
 </Note>
+
+## Kod formatları
+
+`code` alanı iki ayrı kümeden gelir. **Kodlarınızı yazarken bu ayrımı gözetin** — ürün hatalarını
+snake_case değerlerle karşılaştırırsanız hiçbir koşul eşleşmez.
+
+| Küme | Format | Kim üretir | Tam liste |
+|---|---|---|---|
+| **Altyapı kodları** | `lowercase_snake_case` | Ortak API katmanı (auth, validasyon, rate limit, idempotency) | Aşağıdaki tablolar |
+| **Ürün / iş kuralı kodları** | `PV_BÜYÜK_HARF` | İlgili ürün (Sanal POS, Para Transferi…) | [Sanal POS → Payven Domain Kodları](/sanal-pos/errors/payven-codes) (107 kod) |
+| **Banka kodları** | Bankaya göre değişir | İşlemi yürüten banka; `provider_error_code` alanında döner — `code` alanında **değil** | [Banka Yanıt Kodları](/sanal-pos/errors/bank-codes) |
+
+<Warning>
+Ödeme reddi, iade kuralı, 3D Secure gibi **iş kuralı hataları `PV_` öneklidir**
+(`PV_BANK_DECLINED`, `PV_CANNOT_REFUND`, `PV_3DS_FAILED`). Bu sayfadaki snake_case tablolar
+yalnızca **altyapı** hatalarını kapsar.
+</Warning>
 
 ## Yaygın hata kodları
 
@@ -63,32 +80,35 @@ yapın.
 
 | `code` | HTTP | Anlam |
 |---|---|---|
-| `unauthorized` | 401 | `Authorization` header eksik |
-| `invalid_token` | 401 | Access token geçersiz veya kurcalanmış |
-| `token_expired` | 401 | Access token süresi doldu — refresh edin |
-| `invalid_credentials` | 401 | `client_id` / `client_secret` yanlış |
-| `invalid_refresh_token` | 401 | Refresh token expire / revoke edilmiş |
-| `realm_not_found` | 404 | Auth endpoint'inde `{slug}` geçersiz |
-| `realm_suspended` | 403 | Tenant askıya alınmış |
-| `forbidden` | 403 | Bu rol bu kaynağı göremez |
-| `merchant_inactive` | 403 | Belirtilen merchant pasif |
-| `merchant_not_found` | 403 | `X-Merchant-Id` / `X-External-Merchant-Id` çözümlenemedi |
-| `product_not_licensed` | 403 | Modül planınızda etkin değil |
-| `ip_not_allowed` | 403 | İstek IP'si izin listesinde değil |
+| `unauthorized` | 401 | Token yok, geçersiz, süresi dolmuş veya imza doğrulanamadı |
+| `client_unauthorized` | 401 | `/token` veya `/refresh`: API anahtarı geçersiz, pasif ya da silinmiş — **retry etmeyin** |
+| `refresh_token_expired` | 401 | `/refresh`: oturum sona erdi (boşta kalma ya da 10 saatlik mutlak sınır). **Beklenen** — `client_credentials` ile yeniden token alın |
+| `refresh_token_invalid` | 401 | `/refresh`: token bozuk, başka realm'e ait veya iptal edilmiş |
+| `audience_invalid` | 401 | Token başka bir ürün için üretilmiş (API anahtarının scope'unda bu ürün yok) |
+| `forbidden` | 403 | Bu rol/anahtar bu kaynağı göremez |
+| `feature_not_available` | 403 | Modül bu tenant için etkin değil |
+| `merchant_context_missing` | 400 | Mutasyon isteğinde `X-Merchant-Id` / `X-External-Merchant-Id` yok |
+
+<Note>
+Bayi çözümleme hataları (geçersiz/pasif bayi) ürün kodu olarak döner:
+`PV_INVALID_MERCHANT_ID`, `PV_MERCHANT_NOT_FOUND`, `PV_MERCHANT_INACTIVE`.
+</Note>
 
 ### İstek formatı / validasyon
 
 | `code` | HTTP | Anlam |
 |---|---|---|
-| `bad_request` | 400 | Genel istek hatası |
-| `invalid_json` | 400 | Gövde geçersiz JSON |
+| `bad_request` | 400 | Genel istek hatası — gövde okunamadı, alan tipi hatalı |
 | `validation_failed` | 422 | Validasyon kuralı ihlali — `errors[]` ile alan listesi |
-| `invalid_amount` | 422 | Tutar pozitif değil veya minimum altında |
-| `invalid_currency` | 422 | Para birimi desteklenmiyor (`TRY` dışı için kapalı) |
-| `invalid_card` | 422 | Kart numarası Luhn checksum'ı geçmiyor |
-| `invalid_expiry` | 422 | Son kullanma tarihi geçmiş veya format yanlış |
-| `invalid_installment` | 422 | Taksit sayısı bu BIN için desteklenmiyor |
-| `invalid_iban` | 422 | IBAN checksum'ı geçmiyor |
+| `unsupported_media_type` | 415 | `Content-Type` `application/json` değil |
+| `method_not_allowed` | 405 | HTTP metodu bu yol için tanımlı değil |
+| `not_acceptable` | 406 | `Accept` header'ı desteklenmiyor |
+
+<Note>
+Alan-bazlı iş kuralı hataları (tutar, kart, IBAN, taksit) ürün kodu olarak döner:
+`PV_INVALID_AMOUNT`, `PV_INVALID_CARD`, `PV_CARD_EXPIRED`, `PV_INVALID_INSTALLMENT`,
+`PV_INVALID_CURRENCY` — tam liste [Payven Domain Kodları](/sanal-pos/errors/payven-codes).
+</Note>
 
 Validasyon hatalarında alan-bazlı detay `errors[]` array'inde döner:
 
@@ -109,29 +129,32 @@ Validasyon hatalarında alan-bazlı detay `errors[]` array'inde döner:
 }
 ```
 
-### Ödeme / işlem kuralları
+### Kaynak / durum
 
 | `code` | HTTP | Anlam |
 |---|---|---|
-| `payment_not_found` | 404 | İşlem bulunamadı |
-| `payment_already_refunded` | 422 | Tüm tutar zaten iade edilmiş |
-| `payment_not_refundable` | 422 | Mevcut durumda iade yapılamaz |
-| `refund_exceeds_original` | 422 | İade tutarı orijinali aşıyor |
-| `void_not_allowed_after_settlement` | 422 | Mutabakat sonrası iptal yapılamaz |
-| `capture_amount_exceeds_authorization` | 422 | Çekim tutarı ön provizyonu aşıyor |
-| `invalid_state_transition` | 409 | Durum geçişi izin verilmiyor (örn. `Failed` → `Captured`) |
-| `duplicate_external_id` | 409 | Aynı `external_id` ile başka işlem zaten var |
+| `resource_not_found` | 404 | Kaynak bulunamadı |
+| `conflict` | 409 | Genel çakışma |
+| `invalid_state` | 409 | Kaynak bu işlem için uygun durumda değil |
 
-### Yönlendirme ve banka
+### Ödeme, iade, 3D Secure ve banka hataları
+
+Bu hatalar **ürün kodu** olarak döner (`PV_` önekli) — bu sayfadaki snake_case tablolarda **yer almazlar**.
+Sık karşılaşılanlar:
 
 | `code` | HTTP | Anlam |
 |---|---|---|
-| `routing_no_match` | 422 | Hiçbir konnektör koşullara uymadı |
-| `connector_unavailable` | 503 | Hedef konnektör geçici olarak devre dışı (circuit breaker açık) |
-| `bank_declined` | 422 | Banka işlemi reddetti — `provider_error_code` bankadan dönen kod |
-| `bank_timeout` | 504 | Banka yanıt vermedi (Smart Retry tetiklenmiş olabilir) |
-| `fraud_blocked` | 422 | Fraud kuralı tetiklendi (`fraud.decision: "block"`) |
-| `fraud_review_required` | 422 | Manuel inceleme bekliyor |
+| `PV_BANK_DECLINED` | 422 | Banka işlemi reddetti — banka ham kodu `provider_error_code` alanında |
+| `PV_INSUFFICIENT_FUNDS` | 422 | Bakiye yetersiz |
+| `PV_CARD_EXPIRED` | 422 | Kartın son kullanma tarihi geçmiş |
+| `PV_DO_NOT_HONOR` | 422 | Banka işleme izin vermedi |
+| `PV_3DS_FAILED` | 422 | 3D Secure doğrulaması başarısız |
+| `PV_FRAUD_SUSPECTED` | 422 | İşlem güvenlik nedeniyle reddedildi |
+| `PV_CANNOT_REFUND` | 422 | Mevcut durumda iade yapılamaz |
+| `PV_TIMEOUT` | 504 | İşlem zaman aşımına uğradı |
+
+**Tam liste (107 kod):** [Sanal POS → Payven Domain Kodları](/sanal-pos/errors/payven-codes).
+Banka ham kodları: [Banka Yanıt Kodları](/sanal-pos/errors/bank-codes).
 
 ### Idempotency / rate limit
 
@@ -231,9 +254,11 @@ function userMessage(problem) {
   switch (problem.code) {
     case "validation_failed":
       return problem.detail;
-    case "bank_declined":
-    case "fraud_blocked":
-    case "fraud_review_required":
+    // Ürün kodları PV_ öneklidir — snake_case ile karşılaştırmayın.
+    case "PV_BANK_DECLINED":
+    case "PV_DO_NOT_HONOR":
+    case "PV_INSUFFICIENT_FUNDS":
+    case "PV_FRAUD_SUSPECTED":
       return "İşleminiz onaylanmadı. Farklı bir kart deneyebilirsiniz.";
     case "rate_limit_exceeded":
       return "Şu an çok fazla istek alıyoruz. Lütfen kısa bir süre sonra tekrar deneyin.";
@@ -248,7 +273,7 @@ function userMessage(problem) {
 Her hata yanıtında dönen **`correlation_id`** değerini paylaşın — log zincirini saniyeler içinde bulabiliriz. Response header'ındaki `X-Correlation-Id` ile gövdedeki `correlation_id` aynı değerdir.
 
 ```text
-Konu:   Refund 422 — refund_exceeds_original
+Konu:   Refund 422 — REFUND_AMOUNT_EXCEEDS_REMAINING
 Detay:  correlation_id: 9f1c8e76-2a3b-4f12-9c8d-12cb24a8a8a8
         instance:      /api/v1/payments/8e3f5c12-.../refund
         zaman:         2026-05-05T14:23:11+03:00

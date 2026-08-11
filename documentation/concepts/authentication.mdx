@@ -115,7 +115,16 @@ curl https://identity.payven.com.tr/api/v1/auth/payven/refresh \
   }'
 ```
 
-Yanıt yine `access_token` + (rotasyonlu) `refresh_token` döner. Eski `refresh_token` artık geçersizdir.
+Yanıt yine `access_token` + (rotasyonlu) `refresh_token` döner. Eski `refresh_token` artık geçersizdir —
+**yanıttaki yeni `refresh_token`'ı saklayın**.
+
+`401` dönerse gövdedeki `code` ne yapmanız gerektiğini söyler:
+
+| `code` | Anlamı | Doğru davranış |
+|---|---|---|
+| `refresh_token_expired` | Oturum sona erdi (2 saat boşta ya da 10 saat mutlak sınır) — **beklenen** | `client_credentials` ile yeniden token alın. Alarm üretmeyin. |
+| `refresh_token_invalid` | Token bozuk, başka realm'e ait veya iptal edilmiş | Saklama/kod hatası — inceleyin |
+| `client_unauthorized` | API anahtarı pasif, silinmiş veya secret değişmiş | Retry etmeyin; anahtar durumunu kontrol edin |
 
 <Note>
 `/refresh` yanıtı **zarfsız** (düz) token nesnesidir: `{ access_token, refresh_token, expires_in, ... }`.
@@ -124,19 +133,38 @@ Zarf (`{ token, challenge }`) yalnızca `/token` (ve login) endpoint'lerinde kul
 
 ## Token süreleri
 
-| Token | Varsayılan süre | Anlam |
+| Token | Süre | Anlam |
 |---|---|---|
-| **Access token** | 5 dakika (300s) | API isteklerinde kullanılır. Süre dolunca refresh ile yenilenir. |
-| **Refresh token** | 30 gün (idle) | 30 gün hareketsiz kalırsa expire olur. Düzenli kullanımda her refresh'te rotate edilir, pratikte expire olmaz. Şüpheli durumda `client_credentials` ile baştan token alın. |
+| **Access token** | 5 dakika (300s) | API isteklerinde kullanılır. Süre dolunca refresh ile ya da yeniden `client_credentials` ile alınır. |
+| **Refresh token** (varsayılan) | **2 saat boşta**, **10 saat mutlak** | Her refresh'te rotate edilir ve boşta süresi sıfırlanır — ancak oturumun 10 saatlik mutlak ömrü **uzatılamaz**. |
+| **Refresh token** (offline — opsiyonel) | **30 gün boşta**, mutlak sınır yok | Yalnızca "offline refresh" izni verilmiş API anahtarlarında; `/token` isteğine `"offline": true` eklenerek alınır. |
+
+<Warning>
+**Refresh token sonsuza kadar yenilenmez.** Düzenli refresh yapsanız bile oturum 10 saatte
+sona erer ve `/refresh` `401` döner. Bu bir hata değil, tasarımdır — entegrasyonunuz bu durumda
+`client_credentials` ile **yeniden token almalıdır**. Aşağıdaki kod örnekleri bunu otomatik yapar
+(refresh başarısız olursa key + secret ile baştan token alır).
+</Warning>
+
+<Note>
+**Sunucu-sunucu entegrasyonda refresh kullanmak zorunda değilsiniz.** Key + secret elinizde
+olduğu sürece süresi dolan token için `/token`'ı yeniden çağırmak tek istektir ve oturum
+süreleri sizi hiç ilgilendirmez. Refresh yolu, token'ı yeniden alamayan istemciler
+(tarayıcı/mobil oturumları) içindir.
+</Note>
 
 <Note>
 **Pratik öneri:** Access token'ı **expiry'sine 60 saniye kala** yenileyin (clock-skew + network latency için margin). Aşağıdaki kod örnekleri bunu otomatik yapar.
+
+Oturumun son dakikalarında `expires_in` 300'den **küçük** dönebilir: hiçbir token oturumdan
+uzun yaşayamaz, bu yüzden süre kalan oturum ömrüne kırpılır. `expires_in` değerini sabit
+varsaymayın, yanıttan okuyun.
 </Note>
 
 <Warning>
 **Token cache'leyin** — her API çağrısında yeniden token almayın. Identity üzerinde
-rate limit vardır (token endpoint'i IP başına dakikada 10). Token'ı bellekte tutup
-expire olana kadar yeniden kullanın.
+rate limit vardır (token endpoint'i IP başına dakikada 60, `/refresh` dakikada 300).
+Token'ı bellekte tutup expire olana kadar yeniden kullanın.
 </Warning>
 
 ## Kod örnekleri (auto-refresh)

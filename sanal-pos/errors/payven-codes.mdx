@@ -55,6 +55,7 @@ durum kodu tabloda belirtilmiştir. Banka tarafından gelen ham yanıt kodu ayr�
 |---|---|---|
 | `PV_TRANSACTION_NOT_FOUND` | 404 | Verilen `transaction_id` bulunamadı |
 | `PV_CONNECTOR_NOT_FOUND` | 422 | Bu işlem için uygun konnektör yok |
+| `PV_CONNECTOR_ALREADY_EXISTS` | 409 | Bu konnektör zaten kayıtlı (konnektör yönetimi) |
 | `PV_ROUTING_RULE_NOT_FOUND` | 422 | Uygun yönlendirme kuralı bulunamadı |
 | `PV_INVALID_MERCHANT_ID` | 422 | `X-Merchant-Id` veya `X-External-Merchant-Id` geçersiz |
 | `PV_MERCHANT_NOT_FOUND` | 404 | Bayi kaydı bulunamadı |
@@ -62,7 +63,6 @@ durum kodu tabloda belirtilmiştir. Banka tarafından gelen ham yanıt kodu ayr�
 | `PV_INVALID_BILLING_CITY` | 422 | Fatura adresi şehir kodu geçersiz |
 | `PV_INVALID_SHIPPING_CITY` | 422 | Gönderim adresi şehir kodu geçersiz |
 | `PV_INVALID_CALLBACK_URL` | 422 | `success_url` / `fail_url` geçersiz (absolute http/https değil) |
-| `PV_INVALID_CALLBACK` | 422 | Geçersiz 3D Secure callback |
 | `PV_EMPTY_CALLBACK_DATA` | 400 | Banka callback'i boş veya parse edilemedi |
 | `PV_MISSING_TRANSACTION_ID` | 400 | Callback'te işlem kimliği yok |
 
