@@ -44,15 +44,34 @@ curl -X POST https://vpos.payven.com.tr/api/v1/payments/8e3f5c12-9a7b-4c8d-bc4e-
 {
   "transaction_id": "8e3f5c12-9a7b-4c8d-bc4e-2c963f66afa6",
   "status":         "completed",
+  "is_success":     true,
   "extra_properties": {
-    "processed_at":            "2026-05-03T15:00:01.234+03:00",
-    "host_reference":          "REFUND-REF-789",
-    "provider_transaction_id": "REFUND-9f3d2b8e",
-    "refund_amount":           "5000",
-    "remaining_refundable":    "10000"
+    "refund_id":              "5c1f0f42-2f0b-4b3d-9f7a-6ad1c2b48e91",
+    "original_transaction_id":"8e3f5c12-9a7b-4c8d-bc4e-2c963f66afa6",
+    "external_id":            "ORDER-1001",
+    "refund_transaction_id":  "REFUND-9f3d2b8e",
+    "refunded_amount":        "5000",
+    "processed_at":           "2026-05-03T12:00:01.2340000+00:00",
+    "receipt_id":             "RCPT-4471",
+    "host_reference":         "REFUND-REF-789"
   }
 }
 ```
+
+| `extra_properties` alanı | Açıklama |
+|---|---|
+| `refund_id` | **Payven tarafındaki iade kaydının kimliği.** İadeyi bizde tekil olarak takip etmek, destek talebi açmak ve iade listesi/raporlarıyla eşleştirmek için bu değeri saklayın. |
+| `original_transaction_id` | İade edilen **orijinal ödemenin** Payven kimliği (üst seviyedeki `transaction_id` ile aynı değer; entegrasyon netliği için burada da tekrarlanır). |
+| `external_id` | Ödeme oluşturulurken gönderdiğiniz **kendi sipariş numaranız**. İadeyi kendi sisteminizdeki sipariş kaydıyla eşleştirmek için kullanın. |
+| `refund_transaction_id` | Bankanın/konnektörün iade için döndürdüğü kimlik. Banka mutabakatında kullanılır. |
+| `refunded_amount` | Bankanın iade ettiği tutar (kuruş). |
+| `processed_at` | İadenin banka tarafında işlendiği an (bu alan UTC döner — yanıtın diğer tarih alanları Türkiye saatindedir). |
+| `receipt_id` | Konnektör dekont/makbuz numarası (banka döndürdüyse). |
+| `host_reference` | RRN / host referansı (banka döndürdüyse). |
+
+<Note>
+`transaction_id` **orijinal ödemenin** kimliğidir, iadenin değil — kısmi iadelerde her çağrıda aynı değer döner. İadenin kendi kimliği `extra_properties.refund_id`, orijinal ödemeye ait alanlar ise `original_transaction_id` ve `external_id` alanlarıdır. Başarısız iade denemelerinde de `refund_id` döner (audit kaydı yazılır), böylece başarısız denemeyi de referans verebilirsiniz.
+</Note>
 
 | `status` sonucu | Anlam |
 |---|---|
@@ -61,7 +80,7 @@ curl -X POST https://vpos.payven.com.tr/api/v1/payments/8e3f5c12-9a7b-4c8d-bc4e-
 | `refund_processing` | İade konnektörde, asenkron — webhook ile takip edin |
 
 <Note>
-Wire seviyesinde **`partially_refunded` adında bir status yoktur.** Kısmi iade, ana Transaction'ın `status`'unu değiştirmez (`completed` kalır); her iade ayrı alt-Transaction kaydı olarak yazılır. Kalan iade edilebilir tutarı `extra_properties.remaining_refundable` veya `GET /payments/{id}` yanıtındaki `refunded_amount` alanından okuyun.
+Wire seviyesinde **`partially_refunded` adında bir status yoktur.** Kısmi iade, ana Transaction'ın `status`'unu değiştirmez (`completed` kalır); her iade ayrı bir iade kaydı olarak yazılır. Kalan iade edilebilir tutarı `GET /payments/{id}` yanıtındaki `net_amount` alanından okuyun.
 </Note>
 
 ## Çoklu kısmi iade
@@ -74,7 +93,7 @@ Bir işleme **birden fazla** kısmi iade yapabilirsiniz. Toplam iade tutarı ori
 | 2 | 5000 | 10000 | `completed` | yeni `refunded` |
 | 3 | 5000 | 15000 | `refunded` (toplam = orijinal) | yeni `refunded` |
 
-İşlem detayını [`GET /api/v1/payments/{transaction_id}`](/sanal-pos/inquiries/payment-detail) ile sorgulayarak kalan iade edilebilir tutarı `extra_properties.remaining_refundable` alanında görebilirsiniz.
+İşlem detayını [`GET /api/v1/payments/{transaction_id}`](/sanal-pos/inquiries/payment-detail) ile sorgulayarak kalan iade edilebilir tutarı `net_amount` alanında görebilirsiniz.
 
 ## Süre kısıtları
 
